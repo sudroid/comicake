@@ -14,14 +14,15 @@ class HomeController extends BaseController {
 	|	Route::get('/', 'HomeController@showWelcome');
 	|
 	*/
-
-	public function showWelcome()
+	public function home()
 	{
-		return View::make('hello');
+		$title = 'C O M I C A K E';
+		return View::make('home')->with('title', $title);
 	}
 	
-	public function showLogin()
+	public function login()
 	{
-		return View::make('login');
+		$title = 'C O M I C A K E';
+		return View::make('login')->with('title', $title);
 	}
 }

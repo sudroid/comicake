@@ -1,10 +1,10 @@
 <?php
 
-class HomeController extends BaseController {
+class UserController extends BaseController {
 
 	/*
 	|--------------------------------------------------------------------------
-	| Default Home Controller
+	| User Controller
 	|--------------------------------------------------------------------------
 	|
 	| You may wish to use controllers instead of, or in addition to, Closure
@@ -14,10 +14,18 @@ class HomeController extends BaseController {
 	|	Route::get('/', 'HomeController@showWelcome');
 	|
 	*/
-
-	public function showWelcome()
+	public function index()
 	{
-		return View::make('hello');
+		return View::make('user');
 	}
-
+	
+	public function showUser()
+	{
+		$user = DB::table('comicdb_user')->get();
+		foreach ($users as $user)
+		{
+			var_dump($user->name);
+		}
+		return View::make('user');
+	}
 }

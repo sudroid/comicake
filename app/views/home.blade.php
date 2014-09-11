@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Comic Center Home</title>
+	<title>{{ $title }} </title>
 	<style>
 		@import url(//fonts.googleapis.com/css?family=Lato:700);
 
@@ -36,7 +36,7 @@
 </head>
 <body>
 	<div class="welcome">
-		<img src="http://i.imgur.com/YNNarj6.jpg" width="200px" height="200px" >
+		<a href="login"><img src="http://i.imgur.com/YNNarj6.jpg" width="200px" height="200px" ></a>
 		<h1>You have arrived.</h1>
 	</div>
 </body>

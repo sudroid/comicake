@@ -2,7 +2,13 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Comic Center Home</title>
+	<title>{{ $title }}</title>
+	<!-- Minified Jquery --> 	
+	<script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 	<style>
 		@import url(//fonts.googleapis.com/css?family=Lato:700);
 
@@ -35,9 +41,4 @@
 	</style>
 </head>
 <body>
-	<div class="welcome">
-		<a href="login"><img src="http://i.imgur.com/YNNarj6.jpg" width="200px" height="200px" ></a>
-		<h1>You have arrived.</h1>
-	</div>
-</body>
-</html>
+	
