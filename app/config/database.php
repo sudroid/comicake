@@ -1,4 +1,27 @@
 <?php
+/*
+|--------------------------------------------------------------------------
+| Procedural code 
+|--------------------------------------------------------------------------
+|
+| This piece of code tells the app to retrieve the CLEARDB_DATABSE_URL 
+| environmental variable. parse_url function is used to get the URL and use 
+| it in a way that Laravel will understand in that it will be Laravel-config
+| -friendly.
+|
+*/
+
+$url = parse_url(getenv("CLEARDB_DATABASE_URL"));
+
+// $host = $url["host"];
+// $username = $url["user"];
+// $password = $url["pass"];
+// $database = substr($url["path"], 1);
+
+$host = 'us-cdbr-iron-east-01.cleardb.net';
+$username = 'b4aef5d32bc848';
+$password = 'dad0bb7d';
+$database = 'heroku_53bea9165d93213';
 
 return array(
 
@@ -54,10 +77,10 @@ return array(
 
 		'mysql' => array(
 			'driver'    => 'mysql',
-			'host'      => 'localhost',
-			'database'  => '000277970',
-			'username'  => '000277970',
-			'password'  => '19890208',
+			'host'      => $host,
+			'database'  => $database,
+			'username'  => $username,
+			'password'  => $password,
 			'charset'   => 'utf8',
 			'collation' => 'utf8_unicode_ci',
 			'prefix'    => '',

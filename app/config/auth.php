@@ -13,6 +13,17 @@ return array(
 	|
 	| Supported: "database", "eloquent"
 	|
+	| Laravel’s authentication mechanism is “driver based”, meaning the 
+	| responsibility for retrieving users during authentication is delegated to 
+	| various “drivers”. Two are included out of the box: “Eloquent” and 
+	| “Database”.
+	|
+	| The Eloquent driver uses the Eloquent ORM to load the users of your 
+	| application, and is the default authentication driver. The Database driver
+	| uses the Laravel fluent query builder to interact with the database and 
+	| load your users.
+	|
+	|
 	*/
 
 	'driver' => 'eloquent',
@@ -41,7 +52,7 @@ return array(
 	|
 	*/
 
-	'table' => 'users',
+	'table' => 'comicdb_users',
 
 	/*
 	|--------------------------------------------------------------------------

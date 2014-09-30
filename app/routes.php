@@ -1,5 +1,11 @@
 <?php
 
-Route::get('/', 'HomeController@home');
-Route::get('/login', 'HomeController@login');
-Route::get('/user', 'UserController@showUser');
+Route::get('browse', 'BrowseController@index');
+
+Route::controller('browse', 'BrowseController');
+
+Route::controller('password', 'RemindersController');
+
+Route::get('/', 'HomeController@showWelcome');
+
+Route::controller('/', 'UsersController');

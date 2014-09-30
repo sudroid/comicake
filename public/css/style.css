@@ -1,0 +1,91 @@
+@import url(//fonts.googleapis.com/css?family=Lato:700);
+
+body {
+	margin:0;
+	font-family:'Lato', sans-serif;
+	text-align:center;
+	color: #fff;
+	background-color:#FF5258;
+}
+
+.welcome {
+	width: 300px;
+	height: 200px;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin-left: -150px;
+	margin-top: -100px;
+}
+
+.login {
+	width: 500px;
+	height: 300px;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin-left: -210px;
+	margin-top: -150px;
+}
+
+.login input.signIn {
+	width:100px;
+}
+
+.login input, .createAccount {
+	width:300px;
+}
+
+.createAccount {
+	width:410px;
+	float:left;
+}
+
+
+a, a:visited {
+	text-decoration:none;
+	color:#fff;
+}
+
+h1 {
+	font-size: 32px;
+	margin: 16px 0 0 0;
+}
+
+.sidebar ul li {
+	list-style: none;
+	padding-bottom:10px;
+}
+
+.sidebar ul a {
+	background: #428BCA;
+	color: #FFF;
+	display: block;
+	margin-bottom: 10px;
+	padding: 10px;
+	text-transform: uppercase;
+	text-decoration: none;
+}
+
+.sidebar ul a:hover {
+	background: #3276B1;
+	text-decoration: none;
+}
+
+.sidebar ul input {
+	margin-bottom:20 !important;
+}
+
+.active a {
+	background-color:#F0AD4E !important;
+}
+
+.cap-overlay {
+	width: 100%; 
+	color: #FFF;
+	background: rgba(0, 0, 0, 0.43);
+	left: 0;
+	padding: 12px;
+	line-height: 1.4em;
+	font-size: 14px;
+}
