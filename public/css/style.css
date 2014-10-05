@@ -5,7 +5,8 @@ body {
 	font-family:'Lato', sans-serif;
 	text-align:center;
 	color: #fff;
-	background-color:#FF5258;
+	background-color:#FF5258; //#563D7C; Dev
+	padding-top: 130px;
 }
 
 .welcome {
@@ -26,6 +27,11 @@ body {
 	top: 50%;
 	margin-left: -210px;
 	margin-top: -150px;
+}
+
+.form-signup, .form-signin {
+    width: 300px;
+    margin: 0 auto;
 }
 
 .login input.signIn {
@@ -88,4 +94,9 @@ h1 {
 	padding: 12px;
 	line-height: 1.4em;
 	font-size: 14px;
+}
+
+.container {
+	margin-top:120px;
+	margin-bottom:100px;
 }

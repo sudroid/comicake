@@ -19,6 +19,17 @@ class UsersController extends BaseController {
     	$this->layout->content = View::make('register');
 	}
 
+	/** NOTE ABOUT PASSWORDS: 
+	 * Hash::make($value) creates a hash using password_hash($value, PASSWORD_BCRYPT, array('cost' => $cost)) 
+	 * See http://nl1.php.net/manual/en/function.password-hash.php 
+	 * This is 1-way. You can never get the original string back. 
+	 *
+	 * The first part of the generated hash, exists of the used algorithm and the salt.
+	 * So when you pass in the original hash in Hash::check(), you can check if you get the same result. 
+	 * See http://nl1.php.net/manual/en/function.password-verify.php 
+	 *
+	 *Laravel uses BCRYPT, so you have to see if you can use that.
+	*/
 	public function postCreate() {
 		$validator = Validator::make(Input::all(), User::$rules);
 
@@ -26,8 +37,6 @@ class UsersController extends BaseController {
 			$user = new User;
 			$user->username = Input::get('username');
 			$user->email = Input::get('email');
-			$user->usersq = Input::get('usersq');
-			$user->usersa = Input::get('usersa');
 			$user->password = Hash::make(Input::get('password'));
 			$user->save();
 

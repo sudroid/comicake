@@ -11,7 +11,7 @@ class BrowseController extends BaseController {
 	{
 		$randomNum = rand(1, 4);
 		$data['title'] = "The latest...";
-		$data['comics'] = Comicdb::paginate(4);
+		$data['comics'] = Comicdb::latest()->get();
 		$this->layout->content = View::make('browse', $data);
 	}
 
@@ -22,9 +22,6 @@ class BrowseController extends BaseController {
 	 */
 	public function getSeries()
 	{
-		/* TODO:
-		*	Get all series -> issues 
-		*/
 		$data['title'] = 'SERIES';
 		$data['comics'] = DB::table('comicdb_books')->get();
 		$this->layout->content = View::make('browse', $data);
@@ -86,9 +83,7 @@ class BrowseController extends BaseController {
 		*	Get all series published in x year -> series -> issues
 		*/
 		$data['title'] = 'YEAR';
-		$date = "2014";
- 		$my_date = date('yyyy', strtotime($date));
-		$data['comics'] = Comicdb::where('published_date', '>', $my_date)->get();
+		$data['comics'] = DB::table('comicdb_issues')->select(DB::raw('year(published_date) as year'))->distinct()->get();
 		$this->layout->content = View::make('browse', $data);
 	}
 }
