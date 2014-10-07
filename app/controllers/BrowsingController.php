@@ -8,8 +8,18 @@ class BrowsingController extends BaseController {
 	{
 		// THIS INVOKES A STATIC METHOD SERIES
 		$data['book_title'] = $book;
-		$data['book_info'] = Comicdb::series($book)->get();
-		$this->layout->content = View::make('issue', $data);
+		$data['book_info'] = Comicdb::series($book)->select('comicdb_issues.issue_id','publisher_name','book_description', 'genre_name', 'cover_image')
+												   ->distinct()->get();
+		$this->layout->content = View::make('series', $data);
+	}
+
+	public function getIssues($book, $issue_no){
+		$comics = new Comicdb();
+		$data['book_title'] = $book;
+		$data['book_info'] = Comicdb::issues($book, $issue_no)->distinct()->get();
+		$data['book_genre'] = Comicdb::issuegenre($book, $issue_no)->distinct()->get();
+		$data['book_characters'] = Comicdb::bookcharacters($book)->select('character_name')->distinct()->get();
+		$this->layout->content = View::make('issues', $data);
 	}
 
 	public function getAuthors($author)
@@ -23,7 +33,7 @@ class BrowsingController extends BaseController {
 											   	->distinct()
 											   	->get();
 		$data['author_works'] = $comics->authors($author)
-									   ->select('book_name')
+									   ->select('book_name', 'author_description')
 									   ->orderBy('published_date', 'desc')
 									   ->distinct()
 									   ->get();
@@ -40,7 +50,7 @@ class BrowsingController extends BaseController {
 											   	->distinct()
 											   	->get();
 		$data['artist_works'] = $comics->artists($artist)
-									   ->select('book_name')
+									   ->select('book_name','artist_description')
 									   ->orderBy('published_date', 'desc')
 									   ->distinct()
 									   ->get();
@@ -67,16 +77,30 @@ class BrowsingController extends BaseController {
 		$data['genre_name'] = $genre;
 		$comics = new Comicdb();
 		$data['genre_cover'] = $comics->genres($genre)
-	    										->select('cover_image')
-												->orderBy('published_date', 'desc')
-											   	->distinct()
-											   	->get();
+									  ->select('cover_image')
+									  ->orderBy('published_date', 'desc')
+								   	  ->distinct()->get();
 		$data['genre_works'] = $comics->genres($genre)
 								 		  ->select('book_name')
 										  ->orderBy('published_date', 'desc')
+										  ->distinct()->get();
+		$this->layout->content = View::make('genre', $data);
+	}
+
+	public function getCharacters($character){
+		$data['character_name'] = $character;
+		$comics = new Comicdb();
+		$data['character_cover'] = $comics->characters($character)
+									->select('cover_image')
+									->orderBy('published_date', 'desc')
+								   	->distinct()
+								   	->get();
+		$data['character_works'] = $comics->characters($character)
+								 		  ->select('book_name', 'character_description')
+										  ->orderBy('published_date', 'desc')
 										  ->distinct()
 										  ->get();
-		$this->layout->content = View::make('genre', $data);
+		$this->layout->content = View::make('character', $data);
 	}
 
 	public function getYears($year){

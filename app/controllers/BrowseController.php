@@ -7,11 +7,12 @@ class BrowseController extends BaseController {
 	 *
 	 * @return Response
 	 */
-	public function index()
+	public function getIndex()
 	{
 		$randomNum = rand(1, 4);
 		$data['title'] = "The latest...";
-		$data['comics'] = Comicdb::latest()->get();
+		$data['comics'] = Comicdb::latest()->select('comicdb.book_id', 'comicdb_issues.issue_id', 'book_name', 'cover_image', 'summary')
+										   ->distinct()->get();
 		$this->layout->content = View::make('browse', $data);
 	}
 
