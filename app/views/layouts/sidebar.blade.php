@@ -1,8 +1,13 @@
 <nav class="sidebar">
 	<ul>
 		<li>
-			<input class="col-sm-2 form-control" type="search">
-			<br /><br /><br />
+			<form class="navbar-form navbar-right">
+				<input type="text" class="col-md-3 form-control" placeholder="Search...">
+			</form>
+			<div style="clear:both"></div>
+		</li>
+		<li class="{{ Request::is('browse') ? 'active' : '' }}">
+			{{ HTML::link('/browse','BROWSE THE LATEST') }}
 		</li>
 		<li class="{{ Request::is('browse/series') ? 'active' : '' }}">
 			{{ HTML::link('/browse/series', 'SERIES') }}
@@ -26,8 +31,10 @@
 		<li class="{{ Request::is('browse/year') ? 'active' : '' }}">
 			{{ HTML::link('/browse/year','YEAR') }}
 		</li>
-		<li class="{{ Request::is('browse') ? 'active' : '' }}">
-			{{ HTML::link('/browse','BROWSE THE LATEST') }}
+		@if(Auth::check())
+		<li>
+			{{ HTML::link('post', 'ADD NEW SERIES')}}
 		</li>
+		@endif
 	</ul>
 </nav>

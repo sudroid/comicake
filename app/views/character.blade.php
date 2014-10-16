@@ -2,14 +2,10 @@
 	<div class="col-md-3">
 		@include('layouts.sidebar')
 	</div>
-	<div class="col-md-9 pull-right">
-		<div class="col-md-2"></div>
+	<div class="col-md-8 pull-left">
 		<div class="col-md-10 pull-left text-left jumbotron">
 			<h1 class="text-uppercase">{{ $character_name }}</h1>
-			<p>Biography</p>
-			<blockquote>{{ $character_works[0]->character_description }}</blockquote>
 		</div>
-		<div class="col-md-2"></div>
 		<div class="col-md-10 pull-left text-uppercase text-left">
 			<div class="col-md-5 pull-left text-uppercase text-left">
 				<h4>Appeared in...</h4>

@@ -10,8 +10,6 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 	public static $rules = array(
 	    'username' => 'required|alpha_dash|min:6',
 	    'email' => 'required|email|unique:comicdb_users',
-	    'usersq' => 'required|min:10',
-	    'usersa' => 'required|min:2',
 	    'password' => 'required|alpha_num|between:6,12|confirmed',
 	    'password_confirmation' => 'required|alpha_num|between:6,12'
 	);

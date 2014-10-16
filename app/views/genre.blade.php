@@ -2,7 +2,7 @@
 	<div class="col-md-3">
 		@include('layouts.sidebar')
 	</div>
-	<div class="col-md-9 pull-right">
+	<div class="col-md-8 pull-left">
 		<h1 class="text-uppercase">{{ $genre_name }}</h1>
 		<br />
 		<div class="col-md-6 pull-left text-left text-uppercase">

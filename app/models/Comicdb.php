@@ -21,25 +21,25 @@ class Comicdb extends Eloquent implements UserInterface, RemindableInterface {
 	 */
 	protected $fillable = array();
 
-	public function scopeLatest($query){
-		return $query->join('comicdb_books', 'comicdb_books.id', '=', 'comicdb.book_id')
-					 ->join('comicdb_issues', 'comicdb_issues.book_id', '=', 'comicdb.book_id')
-					 ->join('comicdb_artists', 'comicdb_artists.id', '=', 'comicdb.artist_id_FK')
-					 ->join('comicdb_authors', 'comicdb_authors.id', '=', 'comicdb.author_id_FK')
-					 ->join('comicdb_genre', 'comicdb_genre.id', '=', 'comicdb.genre_id_FK')
-					 ->join('comicdb_publishers', 'comicdb_publishers.id', '=', 'comicdb.publisher_id_FK')
-					 ->orderBy('comicdb_issues.published_date', 'desc')
-					 ->groupBy('comicdb.book_id', 'comicdb.issue_id', 'summary', 'cover_image')
-					 ->take(3);
-	}
+	// public function scopeLatest($query){
+	// 	return $query->join('comicdb_books', 'comicdb_books.id', '=', 'comicdb.book_id')
+	// 				 ->join('comicdb_issues', 'comicdb_issues.book_id', '=', 'comicdb.book_id')
+	// 				 ->join('comicdb_artists', 'comicdb_artists.id', '=', 'comicdb.artist_id_FK')
+	// 				 ->join('comicdb_authors', 'comicdb_authors.id', '=', 'comicdb.author_id_FK')
+	// 				 ->join('comicdb_genre', 'comicdb_genre.id', '=', 'comicdb.genre_id_FK')
+	// 				 ->join('comicdb_publishers', 'comicdb_publishers.id', '=', 'comicdb.publisher_id_FK')
+	// 				 ->orderBy('comicdb_issues.published_date', 'desc')
+	// 				 ->groupBy('comicdb.book_id', 'comicdb.issue_id', 'summary', 'cover_image')
+	// 				 ->take(3);
+	// }
 
-	public function scopeSeries($query, $issue) {
-		return $query->join('comicdb_books', 'comicdb_books.id', '=', 'comicdb.book_id')
-					 ->join('comicdb_issues', 'comicdb_issues.book_id', '=', 'comicdb.book_id')
-					 ->join('comicdb_genre', 'comicdb_genre.id', '=', 'comicdb.genre_id_FK')
-					 ->join('comicdb_publishers', 'comicdb_publishers.id', '=', 'comicdb.publisher_id_FK')
-					 ->where('comicdb_books.book_name', '=', $issue);
-	}
+	// public function scopeSeries($query, $issue) {
+	// 	return $query->join('comicdb_books', 'comicdb_books.id', '=', 'comicdb.book_id')
+	// 				 ->join('comicdb_issues', 'comicdb_issues.book_id', '=', 'comicdb.book_id')
+	// 				 ->join('comicdb_genre', 'comicdb_genre.id', '=', 'comicdb.genre_id_FK')
+	// 				 ->join('comicdb_publishers', 'comicdb_publishers.id', '=', 'comicdb.publisher_id_FK')
+	// 				 ->where('comicdb_books.book_name', '=', $issue);
+	// }
 
 	public function scopeIssues($query, $title, $issues) {
 		return $query->join('comicdb_books', 'comicdb_books.id', '=', 'comicdb.book_id')

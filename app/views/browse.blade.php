@@ -1,8 +1,9 @@
 <div class="row">
-	<div class="col-md-3">
+	<div class="col-sm-3 col-md-2">
 		@include('layouts.sidebar')
 	</div>
-	<div class="col-md-9 pull-right">
+	<div class="col-md-1"></div>
+	<div class="col-md-8 pull-left">
 		<div class="page-header"><h1>{{ $title }}</h1></div>
 		<br />
 			@foreach($comics as $comic)
@@ -15,6 +16,7 @@
 							<h2 class="text-uppercase">{{ $comic->book_name.' #'.$comic->issue_id }}</h2>
 							<br />
 							<p>{{ $comic->summary }}</p>
+							<a class='btn btn-primary' href="{{ URL::current() }}/series/{{ $comic->book_name }}/{{ $comic->issue_id }}">read more...</a>
 						</div>
 					</div>
 				@else

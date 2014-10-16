@@ -5,7 +5,7 @@ use Illuminate\Auth\UserInterface;
 use Illuminate\Auth\Reminders\RemindableTrait;
 use Illuminate\Auth\Reminders\RemindableInterface;
 
-class Author extends Eloquent implements UserInterface, RemindableInterface {
+class Genre extends Eloquent implements UserInterface, RemindableInterface {
 	
 	use UserTrait, RemindableTrait;
 
@@ -14,7 +14,7 @@ class Author extends Eloquent implements UserInterface, RemindableInterface {
 	 *
 	 * @var string
 	 */
-	protected $table = 'comicdb_authors';
+	protected $table = 'comicdb_publishers';
 
 	/**
 	 * Only the variables we defined here are changable
@@ -22,6 +22,6 @@ class Author extends Eloquent implements UserInterface, RemindableInterface {
 	protected $fillable = array();
 
 	public function comicdb() {
-		return $this->belongsTo('Comicdb');
+		return $this->belongsTo('Comicbooks');
 	}
 }
