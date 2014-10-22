@@ -3,3 +3,4 @@
 {{ HTML::script('js/bootstrap.min.js') }}
 {{ HTML::script('js/ryun-HCaptions/jquery.hcaptions.js') }}
 {{ HTML::script('js/script.js') }}
+{{ HTML::script('js/scotchPanels.js') }}

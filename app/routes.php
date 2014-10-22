@@ -1,7 +1,10 @@
 <?php
 
-//Add Controller
-Route::resource('post', 'PostController');
+//Add Content Controller for Issue
+Route::resource('content/issue', 'IssueController');
+
+//Add Content Controller for Series
+Route::resource('content/series', 'ContentController');
 
 //Browse options 
 Route::get('browse/series/{title}/{issue}', 'BrowseController@getIssues');

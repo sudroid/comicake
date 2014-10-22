@@ -1,4 +1,4 @@
-<nav class="sidebar">
+<nav class="sidebar side-panel">
 	<ul>
 		<li>
 			<form class="navbar-form navbar-right">
@@ -33,7 +33,7 @@
 		</li>
 		@if(Auth::check())
 		<li>
-			{{ HTML::link('post', 'ADD NEW SERIES')}}
+			{{ HTML::link('content/series', 'ADD NEW SERIES')}}
 		</li>
 		@endif
 	</ul>

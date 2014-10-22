@@ -1,8 +1,6 @@
 <div class="row">
-	<div class="col-md-3">
-		@include('layouts.sidebar')
-	</div>
-	<div class="col-md-8 pull-left">
+	<div class="col-md-1"></div>
+	<div class="col-md-11 pull-left">
 		<h1 class="text-uppercase">{{ $genre_name }}</h1>
 		<br />
 		<div class="col-md-6 pull-left text-left text-uppercase">

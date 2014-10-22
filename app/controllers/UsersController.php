@@ -28,7 +28,7 @@ class UsersController extends BaseController {
 	 * So when you pass in the original hash in Hash::check(), you can check if you get the same result. 
 	 * See http://nl1.php.net/manual/en/function.password-verify.php 
 	 *
-	 *Laravel uses BCRYPT, so you have to see if you can use that.
+	 * Laravel uses BCRYPT, so you have to see if you can use that.
 	*/
 	public function postCreate() {
 		$validator = Validator::make(Input::all(), User::$rules);
@@ -51,7 +51,7 @@ class UsersController extends BaseController {
 	}
 
 	public function postSignin() {
-		if (Auth::attempt(array('username'=>Input::get('username'), 'password'=>Input::get('password')))) {
+		if (Auth::attempt(array('username'=>Input::get('username'), 'password'=>Input::get('password'), 'activityStatus' => 1))) {
 			return Redirect::to('dashboard')->with('message', 'You are now logged in!');
 		} else {
 			return Redirect::to('login')

@@ -1,14 +1,14 @@
 <div class="row">
-	<div class="col-sm-3 col-md-2">
-		@include('layouts.sidebar')
-	</div>
 	<div class="col-md-1"></div>
-	<div class="col-md-8 pull-left">
+	<div class="col-md-10 pull-left">
 		<div class="page-header"><h1>{{ $title }}</h1></div>
 		<br />
+		@if(Session::has('postMsg'))
+            <p class="alert">{{ Session::get('postMsg') }}</p>
+        @endif
 			@foreach($comics as $comic)
 				@if(Request::path() == 'browse')
-					<div class="col-md-4">
+					<div class="col-md-3 pull-left">
 						<a href="#" data-target="drop-panel" class="hcaption" cap-effect="fade">
 							{{ HTML::image($comic->cover_image, $comic->issue_id . $comic->book_id, array('width' => '100%')); }}
 						</a>

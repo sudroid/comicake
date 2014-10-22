@@ -1,5 +1,8 @@
 @import url(//fonts.googleapis.com/css?family=Lato:700);
 
+* {
+	z-index:0;
+}
 body {
 	margin:0;
 	font-family:'Lato', sans-serif;
@@ -59,7 +62,7 @@ h1 {
 }
 
 .sidebar {
-	position: fixed;
+	margin-left:-2px;
 }
 
 .sidebar ul li {
@@ -104,6 +107,15 @@ h1 {
 	padding-top:70px;
 }
 
+.row {
+	padding-bottom:100px;
+}
+
+.scotch-panel-wrapper
+{
+	height:100%;
+}
+
 .jumbotron {
 	color:  #333;
 	background-color:#FFF;
@@ -113,11 +125,17 @@ h1 {
 	padding-bottom:35px;
 }
 
-.issues_list,.dl-horizontal {
-	border: 1px solid #fff;
+.links_list {
 	border-radius: 5px;
 	margin: 20px 0px;
 	padding:10px;
+}
+
+.issues_list, .dl-horizontal {
+	background-color: #428BCA;
+	margin: 20px 0px;
+	padding:10px;
+	color:#fff;
 }
 
 #ddlGenre {
@@ -126,4 +144,13 @@ h1 {
 
 .textupper {
 	text-transform: uppercase;
+}
+
+.has-error {
+	padding:5px;
+	color:#F0AD4E;
+}
+
+.modal {
+	color: black !important;
 }

@@ -7,6 +7,9 @@
         @include('includes.navbar')
     @endif
     <div class="container-fluid main">
+        @if(Request::path() != '/') 
+            @include('layouts.sidebar')
+        @endif
         @if(Session::has('message'))
             <p class="alert">{{ Session::get('message') }}</p>
         @endif
