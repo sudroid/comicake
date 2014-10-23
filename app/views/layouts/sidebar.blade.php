@@ -1,9 +1,10 @@
 <nav class="sidebar side-panel">
 	<ul>
 		<li>
-			<form class="navbar-form navbar-right">
-				<input type="text" class="col-md-3 form-control" placeholder="Search...">
-			</form>
+			{{ Form::open(array('url'=>'search')) }}
+				{{ Form::text('keyword', null, array('class' => 'col-md-3 form-control', 'placeholder' => 'Search...')) }} 
+				{{ Form::submit('SEARCH', array('class' => 'col-sm-3 btn btn-warning btn-block')) }}
+			{{ Form::close() }}
 			<div style="clear:both"></div>
 		</li>
 		<li class="{{ Request::is('browse') ? 'active' : '' }}">

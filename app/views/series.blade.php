@@ -19,21 +19,21 @@
 			</dl>
 		</div>
 		@if(Auth::check())
-			<div class="col-md-4 pull-left text-uppercase text-left links_list">
+			<div class="col-md-3 pull-left text-uppercase text-left links_list">
 					{{ HTML::link('content/series/'.$book_title.'/edit', 'EDIT SERIES INFORMATION', array('class'=>'btn btn-primary btn-block'))}}
 					{{ HTML::link('content/issue/create', 'ADD NEW ISSUE', array('class'=>'btn btn-primary btn-block'))}}
 					{{ HTML::link('#', 'DELETE SERIES', array('class'=>'btn btn-primary btn-block', 'id'=>'delete'))}}
 					{{ HTML::link(URL::previous(), 'BACK', array('class'=>'btn btn-primary btn-block'))}}
 			</div>
 		@else
-			<div class="col-md-4 pull-left text-uppercase text-left links_list">
+			<div class="col-md-3 pull-left text-uppercase text-left links_list">
 				{{ HTML::link(URL::previous(), 'BACK', array('class'=>'btn btn-primary btn-block'))}}
 			</div>
 		@endif
-		<div class="col-md-12">
+		<div class="col-md-8">
 			@if(isset($book_issues))
 				@foreach($book_issues as $issue)
-					<div class="col-md-2 pull-left">
+					<div class="col-md-3 pull-left thumbnail">
 						<a href='{{ $book_title }}/{{ $issue->issue_id }}' >{{ HTML::image($issue->cover_image, $book_title . $issue->issue_id, array('width' => '100%', 'class'=>'img-rounded')); }}</a>
 					</div>
 				@endforeach

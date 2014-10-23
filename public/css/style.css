@@ -65,6 +65,10 @@ h1 {
 	margin-left:-2px;
 }
 
+.sidebar ul {
+ 	margin-right:40px;
+}
+
 .sidebar ul li {
 	list-style: none;
 	padding-bottom:10px;
@@ -153,4 +157,18 @@ h1 {
 
 .modal {
 	color: black !important;
+}
+
+.search {
+	height:600px;
+}
+
+.search .col-md-2 {
+	width:20%;
+}
+
+.search-header {
+	padding:20px;
+	color: #FF5258;
+	background-color: #fff;
 }

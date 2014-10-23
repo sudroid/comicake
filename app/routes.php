@@ -1,5 +1,8 @@
 <?php
 
+//Search
+Route::post('search', 'SearchController@index');
+
 //Add Content Controller for Issue
 Route::resource('content/issue', 'IssueController');
 

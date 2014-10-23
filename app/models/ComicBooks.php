@@ -16,7 +16,7 @@ class Comicbooks extends Eloquent {
 
 	public function scopeLatest($query){
 		return $query->join('comicdb_issues', 'comicdb_issues.book_id', '=', 'comicdb_books.id')
-					 ->orderBy('comicdb_issues.published_date', 'desc')
+					 ->orderBy('comicdb_issues.created_at', 'desc')
 					 ->take(4);
 	}
 
@@ -25,7 +25,7 @@ class Comicbooks extends Eloquent {
 					 ->join('comicdb_genrebook', 'comicdb_books.id', '=', 'comicdb_genrebook.book_id_FK')
 					 ->join('comicdb_genre', 'comicdb_genre.id', '=', 'comicdb_genrebook.genre_id_FK')
 					 ->join('comicdb_publishers', 'comicdb_publishers.id', '=', 'comicdb_books.publisher_id_FK')
-					 ->where('book_name', '=', $book);	
+					 ->where('book_name', 'LIKE', $book);	
 	}
 
 	public function scopeIssues($query, $title, $issue)
@@ -41,7 +41,7 @@ class Comicbooks extends Eloquent {
 	public function scopeIssueGenre($query, $title, $issue){
 		return $query->join('comicdb_genrebook', 'comicdb_books.id', '=', 'comicdb_genrebook.book_id_FK')
 					 ->join('comicdb_genre', 'comicdb_genre.id', '=', 'comicdb_genrebook.genre_id_FK')
-					 ->where('book_name', '=', $title)
+					 ->where('book_name', 'LIKE', $title)
 					 ->select('genre_name');
 	}
 
@@ -49,7 +49,7 @@ class Comicbooks extends Eloquent {
 		return $query->join('comicdb_issues', 'comicdb_issues.book_id', '=', 'comicdb_books.id')
 					 ->join('comicdb_characterbook', 'comicdb_characterbook.book_id_FK', '=', 'comicdb_books.id')
 					 ->join('comicdb_characters', 'comicdb_characters.id', '=', 'comicdb_characterbook.character_id_FK')
-					 ->where('book_name', '=', $title);
+					 ->where('book_name', 'LIKE', $title);
 	}
 
 	public function scopeCharacters($query, $character){
