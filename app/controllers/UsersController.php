@@ -7,7 +7,8 @@ class UsersController extends BaseController {
 
 	public function __construct() {
 		$this->beforeFilter('csrf', array('on'=>'post'));
-		$this->beforeFilter('auth', array('only'=>array('getDashboard')));
+		$this->beforeFilter('auth', array('only'=>array('getDashboard', 'getAdmin')));
+		$this->beforeFilter('auth.admin', array('only'=>array('getAdmin')));
 	}
 
 	public function index() 
@@ -51,7 +52,7 @@ class UsersController extends BaseController {
 	}
 
 	public function postSignin() {
-		if (Auth::attempt(array('username'=>Input::get('username'), 'password'=>Input::get('password'), 'activityStatus' => 1))) {
+		if (Auth::attempt(array('username'=>Input::get('username'), 'password'=>Input::get('password'), 'active' => 1))) {
 			return Redirect::to('dashboard')->with('message', 'You are now logged in!');
 		} else {
 			return Redirect::to('login')
@@ -61,7 +62,29 @@ class UsersController extends BaseController {
 	}
 
 	public function getDashboard() {
-		$this->layout->content = View::make('users.dashboard');
+		$user 		= Auth::user()->id;
+		$admin 		= Auth::user()->admin;
+		$active 	= Auth::user()->active;
+		$data['admin_msg'] = ($admin == 0) ? 'USER' : 'ADMIN';
+		$data['active_msg'] = ($active == 0) ? 'INACTIVE' : 'ACTIVE';
+
+		$data['user_read'] = Userinfo::Userbookread($user)->where('read_status', 1)->select('book_name')->get();
+		$data['user_to_read'] = Userinfo::Userbookread($user)->where('reading_status', 1)->select('book_name')->get();
+		
+		$this->layout->content = View::make('users.dashboard', $data);
+	}
+
+	public function getAdmin(){
+		$data['users_inactive'] = User::where('active', '=', 0)->get();
+		$data['users_active'] 	= User::where('active', '=', 1)->get();
+		$data['recent_books'] 	= Comicbooks::select('book_name','updated_at')->orderBy('updated_at', 'desc')->paginate(3);
+		$data['user_count']		= User::where('id', '>', 0)->count();
+		$data['publisher_count']= Publishers::where('id', '>', 0)->count();
+		$data['books_count']	= Comicbooks::where('id', '>', 0)->count();
+		$data['issue_count']	= Comicissues::where('issue_id', '>', 0)->where('book_id', '>', 0)->count();
+		$data['artist_count']	= DB::table('comicdb_artists')->count(); 
+		$data['author_count']	= DB::table('comicdb_authors')->count();
+		$this->layout->content 	= View::make('admin.index', $data);
 	}
 
 	public function getLogout() {

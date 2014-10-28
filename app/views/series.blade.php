@@ -4,6 +4,9 @@
 		<h1 class="text-uppercase">{{ $book_title }}</h1>
 		{{Session::put('book_title', $book_title);}}
 		<br />
+		@if(Session::has('postMsg'))
+            <h3 class="alert alert-warning" role="alert">{{ Session::get('postMsg') }}</h3>
+        @endif
 		<div class="col-md-8 pull-left text-uppercase text-left">
 			<dl class="dl-horizontal">	
 				<dt>Genre:<dt> 
@@ -18,18 +21,27 @@
 					@endforeach
 			</dl>
 		</div>
-		@if(Auth::check())
-			<div class="col-md-3 pull-left text-uppercase text-left links_list">
-					{{ HTML::link('content/series/'.$book_title.'/edit', 'EDIT SERIES INFORMATION', array('class'=>'btn btn-primary btn-block'))}}
-					{{ HTML::link('content/issue/create', 'ADD NEW ISSUE', array('class'=>'btn btn-primary btn-block'))}}
-					{{ HTML::link('#', 'DELETE SERIES', array('class'=>'btn btn-primary btn-block', 'id'=>'delete'))}}
-					{{ HTML::link(URL::previous(), 'BACK', array('class'=>'btn btn-primary btn-block'))}}
-			</div>
-		@else
-			<div class="col-md-3 pull-left text-uppercase text-left links_list">
+		<div class="col-md-3 pull-left text-uppercase text-left links_list">
+			@if(Auth::check())
+				{{ HTML::link('content/series/'.$book_title.'/edit', 'EDIT SERIES INFORMATION', array('class'=>'btn btn-primary btn-block'))}}
+				{{ HTML::link('content/issue/create', 'ADD NEW ISSUE', array('class'=>'btn btn-primary btn-block'))}}
+				{{ HTML::link('#', 'DELETE SERIES', array('class'=>'btn btn-primary btn-block', 'id'=>'delete'))}}
+				<br />
+				{{ Form::open(array('url' => 'read/'.$book_title, 'method' => 'POST')) }}
+				 	{{ Form::hidden('read_status', $read_status) }}
+					{{ Form::submit($read_msg, array('class'=>'btn btn-primary btn-block margin5')) }}
+				{{ Form::close() }}
+				
+				{{ Form::open(array('url' => 'reading/'.$book_title, 'method' => 'POST')) }}
+				 	{{ Form::hidden('reading_status', $reading_status) }}
+					{{ Form::submit($reading_msg, array('class'=>'btn btn-primary btn-block margin5')) }}
+				{{ Form::close() }}
+				<br />
 				{{ HTML::link(URL::previous(), 'BACK', array('class'=>'btn btn-primary btn-block'))}}
-			</div>
-		@endif
+			@else
+				{{ HTML::link(URL::previous(), 'BACK', array('class'=>'btn btn-primary btn-block'))}}
+			@endif
+		</div>
 		<div class="col-md-8">
 			@if(isset($book_issues))
 				@foreach($book_issues as $issue)

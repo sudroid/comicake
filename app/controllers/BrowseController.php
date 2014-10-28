@@ -6,11 +6,17 @@ class BrowseController extends BaseController {
 
 	public function getIndex()
 	{
-		$randomNum = rand(1, 4);
 		$data['title'] = "The latest...";
 		$data['comics'] = Comicbooks::latest()
 							->select('book_id', 'issue_id', 'summary', 'book_name', 'cover_image')
 							->distinct()->get();
+		$latest_number = count($data['comics'])-1;
+		for ($count=0; $count<$latest_number; $count++) {
+			$summary = $data['comics'][$count]->summary;
+			if(strlen($summary) > 300 ) { 
+				$data['comics'][$count]->summary = substr($summary, 0, 300).'...'; 
+			} 
+		}
 		$this->layout->content = View::make('browse', $data);
 	}
 
@@ -61,6 +67,43 @@ class BrowseController extends BaseController {
 		    $data['book_genre'] = Comicbooks::series($book)->select('genre_name')->distinct()->get();
 		    $data['book_issues']= Comicbooks::series($book)->select('issue_id', 'cover_image', 'book_id')->distinct()->get();
 			$data['book_characters'] = Comicbooks::bookcharacters($book)->select('character_name')->distinct()->get();
+			$comic = Comicbooks::series($book)->select('comicdb_books.id')->first();
+			$read = Userinfo::where('book_id_FK', $comic->id)
+								->where('user_id_FK', Auth::id())
+								->select('read_status', 'reading_status')->first();
+			if ($read != '') {
+				switch($read->read_status){
+					case 0:
+						$data['read_msg'] = 'MARK AS READ';
+						$data['read_status'] = 1;
+						break;
+					case 1:
+						$data['read_msg'] = 'MARK AS UNREAD';
+						$data['read_status'] = 0;
+						break;
+				}
+
+				switch($read->reading_status) {
+					case 0:
+						$data['reading_msg'] = 'ADD TO READLIST';
+						$data['reading_status'] = 1;
+						break;
+					case 1:
+						$data['reading_msg'] = 'REMOVE FROM READLIST';
+						$data['reading_status'] = 0;
+						break;
+				}
+			}
+			else 
+			{
+				$data['read_msg'] = 'MARK AS READ';
+				$data['read_status'] = 1;
+				$data['reading_msg'] = 'ADD TO READLIST';
+				$data['reading_status'] = 1;
+			}
+
+
+			
 			$this->layout->content = View::make('series', $data);
 		}
 		else 

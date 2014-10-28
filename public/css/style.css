@@ -172,3 +172,47 @@ h1 {
 	color: #FF5258;
 	background-color: #fff;
 }
+
+.margin5 {
+	margin-top:5px;
+}
+
+.dash-welcome {
+	padding-top: 40px;
+	padding-bottom: 60px;
+	background-color:#fff;
+	color: #428BCA;
+}
+
+.dash-profile {
+	padding-top:25px;
+	padding-bottom:5px;
+	background-color: #428BCA;
+}
+
+.read-list h3, .reading-list h3{
+	text-decoration: underline;
+}
+
+.read-list ul, .reading-list ul {
+	text-transform: capitalize;
+	padding-left:0px;
+	list-style: none;
+}
+
+th {
+	text-align: center;
+}
+
+.admin-dash-welcome {
+	padding-top: 55px;
+	padding-bottom: 74px;
+	background-color:#fff;
+	color: #428BCA;
+	margin-bottom:20px;
+}
+
+.admin-dash-profile {
+	background-color: #428BCA;
+	margin-bottom:20px;
+}
