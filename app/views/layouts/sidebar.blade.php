@@ -23,14 +23,14 @@
 		<li class="{{ Request::is('browse/publishers') ? 'active' : '' }}">
 			{{ HTML::link('/browse/publishers', 'PUBLISHERS') }}
 		</li>
-		<li class="{{ Request::is('browse/genre') ? 'active' : '' }}">
-			{{ HTML::link('/browse/genre','GENRE') }}
+		<li class="{{ Request::is('browse/genres') ? 'active' : '' }}">
+			{{ HTML::link('/browse/genres','GENRE') }}
 		</li>
 		<li class="{{ Request::is('browse/characters') ? 'active' : '' }}">
 			{{ HTML::link('/browse/characters','CHARACTERS') }}
 		</li>
-		<li class="{{ Request::is('browse/year') ? 'active' : '' }}">
-			{{ HTML::link('/browse/year','YEAR') }}
+		<li class="{{ Request::is('browse/years') ? 'active' : '' }}">
+			{{ HTML::link('/browse/years','YEAR') }}
 		</li>
 		@if(Auth::check())
 		<li>

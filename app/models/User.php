@@ -7,6 +7,9 @@ use Illuminate\Auth\Reminders\RemindableInterface;
 
 class User extends Eloquent implements UserInterface, RemindableInterface {
 	
+	protected $guarded = array('id', 'password');
+	protected $fillable = array('username', 'email', 'admin', 'active', 'created_at', 'updated_at');
+
 	public static $rules = array(
 	    'username' => 'required|alpha_dash|min:6',
 	    'email' => 'required|email|unique:comicdb_users',

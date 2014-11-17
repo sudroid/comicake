@@ -1,4 +1,7 @@
 <?php
+//Laravel query builder uses PDO parameter binding throughout to protect your application against SQL injection attacks. 
+//There is no need to clean strings being passed as bindings.
+
 
 class Comicbooks extends Eloquent {
 
@@ -89,5 +92,10 @@ class Comicbooks extends Eloquent {
 					 ->where(DB::raw('year(published_date)'), '=', $year);
 
 	}
+
+	public function publisherComicbook()
+    {
+        return $this->belongsTo('Publishers', 'publisher_id_FK', 'id');
+    }
 
 }

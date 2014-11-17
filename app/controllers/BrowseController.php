@@ -1,8 +1,15 @@
 <?php
 
+//NOTE: http://fideloper.com/laravel-raw-queries 
+
 class BrowseController extends BaseController {
 
 	protected $layout = "layouts.master";
+
+	protected $msg = '<div class="alert alert-warning alert-dismissible fade in" role="alert">
+			      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+			      <strong>Oops!</strong> There\'s nothing here.
+			    </div>';
 
 	public function getIndex()
 	{
@@ -21,37 +28,34 @@ class BrowseController extends BaseController {
 	}
 
 	public function getBrowse($category){
-		$data['title'] = strtoupper($category);
-		switch(strtolower($category)):
-			case 'series':
-				$data['comics'] = Comicbooks::all();
+		$category_filtered = strtoupper(trim($category));
+		$data['title'] = $category_filtered;
+		switch($category_filtered):
+			case 'SERIES':
+				$data['comics'] = Comicbooks::get();
 				break;
-			case 'authors':
-				$data['comics'] = DB::table('comicdb_authors')->get();
+			case 'AUTHORS':
+				$data['comics'] = Authors::get();
 				break;
-			case 'artists':
-				$data['comics'] = DB::table('comicdb_artists')->get();
+			case 'ARTISTS':
+				$data['comics'] = Artists::get();
 				break;
-			case 'characters':
-				$data['comics'] = DB::table('comicdb_characters')->get();
+			case 'CHARACTERS':
+				$data['comics'] = Characters::get();
 				break;
-			case 'publishers':
-				$data['comics'] = DB::table('comicdb_publishers')->get();
+			case 'PUBLISHERS':
+				$data['comics'] = Publishers::get();
 				break;
-			case 'genre':
-				$data['comics'] = DB::table('comicdb_genre')->get();
+			case 'GENRES':
+				$data['comics'] = Genres::get();
 				break;
-			case 'year':
-				$data['comics'] = DB::table('comicdb_issues')->select(DB::raw('year(published_date) as year'))->distinct()->get();
+			case 'YEARS':
+				$data['comics'] = Comicissues::select(DB::raw('year(published_date) as year'))->distinct()->get();
 				break;
 			default: 
-				$data['title'] = "The latest...";
-				$data['comics'] = Comicbooks::latest()
-							->select('book_id', 'issue_id', 'summary', 'book_name', 'cover_image')
-							->distinct()->get();
+				return Redirect::to('error');
 			   break;
 		endswitch;
-		
 		$this->layout->content = View::make('browse', $data);
 	}
 
@@ -59,8 +63,8 @@ class BrowseController extends BaseController {
 	{
 		// THIS INVOKES A STATIC METHOD SERIES
 		$data['book_title'] = $book;
-		
-		if (Comicbooks::series($book)->select('comicdb_books.id')->distinct()->first())
+		$data['book'] = Comicbooks::series($book)->select('comicdb_books.id')->distinct()->first();
+		if ($data['book'])
 	    {
 	    	$data['book_info'] = Comicbooks::series($book)->select('publisher_name','book_description')
 												   ->distinct()->get();
@@ -101,14 +105,12 @@ class BrowseController extends BaseController {
 				$data['reading_msg'] = 'ADD TO READLIST';
 				$data['reading_status'] = 1;
 			}
-
-
 			
 			$this->layout->content = View::make('series', $data);
 		}
 		else 
 		{
-			return Redirect::to('browse')->with('postMsg', 'Looks like that book does not exist! Please check out any other titles here.');
+			return Redirect::to('error');
 		}
 	}
 
@@ -117,6 +119,11 @@ class BrowseController extends BaseController {
 		$data['book_issue'] = $issue_no;
 		$data['book_info'] = Comicbooks::issues($book, $issue_no)->distinct()->get();
 		$data['book_genre'] = Comicbooks::issuegenre($book, $issue_no)->distinct()->get();
+		//var_dump($data['book_info']);
+		$data['has_issue'] = (count($data['book_info'])) ? true : false;
+		if (!$data['has_issue']) {
+			return Redirect::to('error');
+		}
 		$this->layout->content = View::make('issues', $data);
 	}
 
@@ -131,6 +138,11 @@ class BrowseController extends BaseController {
 									   ->select('book_name')
 									   ->orderBy('published_date', 'desc')
 									   ->distinct()->get();
+
+		$data['has_author'] = (count($data['author_works'])) ? true : false;
+		if (!$data['has_author']) {
+			return Redirect::to('error');
+		}
 	    $this->layout->content = View::make('author', $data);
 	}
 
@@ -144,6 +156,10 @@ class BrowseController extends BaseController {
 									   ->select('book_name')
 									   ->orderBy('published_date', 'desc')
 									   ->distinct()->get();
+	    $data['has_artist'] = (count($data['artist_works'])) ? true : false;
+		if (!$data['has_artist']) {
+			return Redirect::to('error');
+		}
 		$this->layout->content = View::make('artist', $data);
 	}
 
@@ -159,35 +175,53 @@ class BrowseController extends BaseController {
 										  ->orderBy('published_date', 'desc')
 										  ->distinct()
 										  ->get();
+		$data['has_publisher'] = (count($data['publisher_works'])) ? true : false;
+		if (!$data['has_publisher']) {
+			return Redirect::to('error');
+		}
 		$this->layout->content = View::make('publisher', $data);
 	}
 
 	public function getGenres($genre){
 		$data['genre_name'] = $genre;
-		$data['genre_cover'] = Comicbooks::genres($genre)
+		$genre_list = Genres::lists('genre_name');
+		if (!in_array($genre, $genre_list)) {
+			return Redirect::to('error');
+		}
+		else {		
+			$data['genre_cover'] = Comicbooks::genres($genre)
 									  ->select('cover_image')
 									  ->orderBy('published_date', 'desc')
 								   	  ->distinct()->get();
-		$data['genre_works'] = Comicbooks::genres($genre)
-								 		  ->select('book_name')
-										  ->orderBy('published_date', 'desc')
-										  ->distinct()->get();
+			$data['genre_works'] = Comicbooks::genres($genre)
+									 		  ->select('book_name')
+											  ->orderBy('published_date', 'desc')
+											  ->distinct()->get();
+		    $data['has_genre'] = (count($data['genre_works'])) ? true : false;
+
+		    if (!$data['has_genre']) {
+				return Redirect::to('browse/genres')->with('postMsg', $this->msg);
+			}
+		}
 		$this->layout->content = View::make('genre', $data);
 	}
 
 	public function getCharacters($character){
 		$data['character_name'] = $character;
-		$comics = new Comicbooks();
-		$data['character_cover'] = $comics->characters($character)
+		$data['character_cover'] = Comicbooks::characters($character)
 									->select('cover_image')
 									->orderBy('published_date', 'desc')
 								   	->distinct()
 								   	->get();
-		$data['character_works'] = $comics->characters($character)
+		$data['character_works'] = Comicbooks::characters($character)
 								 		  ->select('book_name')
 										  ->orderBy('published_date', 'desc')
 										  ->distinct()
 										  ->get();
+		$data['has_character'] = (count($data['character_works'])) ? true : false;
+		if (!$data['has_character']) {
+			return Redirect::to('error');
+		}
 		$this->layout->content = View::make('character', $data);
 	}
 
@@ -203,6 +237,10 @@ class BrowseController extends BaseController {
 										  ->orderBy('published_date', 'desc')
 										  ->distinct()
 										  ->get();
+		$data['has_year'] = (count($data['year_works'])) ? true : false;
+		if (!$data['has_year']) {
+			return Redirect::to('browse/year')->with('postMsg', $this->msg);
+		}
 		$this->layout->content = View::make('year', $data);
 	}
 }

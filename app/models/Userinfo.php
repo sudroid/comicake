@@ -13,8 +13,4 @@ class UserInfo extends Eloquent {
 		return $query->join('comicdb_books', 'comicdb_books.id', '=', 'comicdb_userinfo.book_id_FK')
 					 ->where('user_id_FK', $user_id);
 	}
-
-	public function scopeUserbookcover($query, $title) {
-
-	}
 }

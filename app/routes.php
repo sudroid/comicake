@@ -8,6 +8,14 @@
  *
  */
 
+View::name('layouts.master', 'layout');
+$layout = View::of('layout');
+
+Route::get('error', function() use ($layout) {
+	$data['postMsg'] = 'Sorry, looks like that doesn\'t exist!';
+	return $layout->nest('content', 'error', $data);
+});
+
 //Mark to read or not to read status
 Route::post('reading/{title}', 'ReadstatusController@postReading');
 //Mark as Read or Unread status
@@ -22,12 +30,12 @@ Route::resource('content/series', 'ContentController');
 
 //Browse options 
 Route::get('browse/series/{title}/{issue}', 'BrowseController@getIssues');
-Route::get('browse/characters/{title}', 'BrowseController@getCharacters');
-Route::get('browse/year/{title}', 'BrowseController@getYears');
-Route::get('browse/genre/{title}', 'BrowseController@getGenres');
-Route::get('browse/publishers/{title}', 'BrowseController@getPublishers');
-Route::get('browse/artists/{title}', 'BrowseController@getArtists');
-Route::get('browse/authors/{title}', 'BrowseController@getAuthors');
+Route::get('browse/characters/{name}', 'BrowseController@getCharacters');
+Route::get('browse/years/{year}', 'BrowseController@getYears');
+Route::get('browse/genres/{name}', 'BrowseController@getGenres');
+Route::get('browse/publishers/{name}', 'BrowseController@getPublishers');
+Route::get('browse/artists/{name}', 'BrowseController@getArtists');
+Route::get('browse/authors/{name}', 'BrowseController@getAuthors');
 Route::get('browse/series/{title}', 'BrowseController@getSeries');
 Route::get('browse/{category}', 'BrowseController@getBrowse');
 Route::get('browse', 'BrowseController@getIndex');

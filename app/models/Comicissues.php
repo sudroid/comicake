@@ -22,4 +22,9 @@ class Comicissues extends Eloquent {
 					 ->where('comicdb_books.book_name', '=', $title)
 					 ->where('comicdb_issues.issue_id', '=', $id);
 	}
+
+	public function authorsIssues()
+    {
+        return $this->belongsTo('Authors', 'author_id_FK', 'id');
+    }
 }

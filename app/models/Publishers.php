@@ -6,7 +6,7 @@ class Publishers extends Eloquent {
 	protected $table = 'comicdb_publishers';
 
 	public function comicbook() {
-		return $this->hasOne('Comicbooks', 'publisher_id_FK');
+		return $this->hasOne('Comicbooks', 'publisher_id_FK', 'id');
 	} 
 
 	public function scopeFindPublisher($publisher)

@@ -4,7 +4,7 @@
 		<div class="page-header"><h1>{{ $title }}</h1></div>
 		<br />
 		@if(Session::has('postMsg'))
-            <p class="alert">{{ Session::get('postMsg') }}</p>
+			{{ Session::get('postMsg') }}
         @endif
 			@foreach($comics as $comic)
 				@if(Request::path() == 'browse')
@@ -22,7 +22,7 @@
 				@else
 					<div class="col-md-10 text-uppercase text-left">
 						@if(Request::path() == 'browse/series')
-							<li>{{ HTML::link(Request::path().'/'.$comic->book_name, $comic->book_name) }}</li>
+							<li>{{ HTML::link(Request::path().'/'.$comic->book_name, $comic->book_name, array('id' => $comic->book_name)) }}</li>
 						@endif
 						@if(Request::path() == 'browse/authors')
 							<li>{{ HTML::link(Request::path().'/'.$comic->author_name, $comic->author_name) }}</li>
@@ -33,13 +33,13 @@
 						@if(Request::path() == 'browse/publishers')
 							<li>{{ HTML::link(Request::path().'/'.$comic->publisher_name, $comic->publisher_name) }}</li>
 						@endif
-						@if(Request::path() == 'browse/genre')
+						@if(Request::path() == 'browse/genres')
 							<li>{{ HTML::link(Request::path().'/'.$comic->genre_name, $comic->genre_name) }}</li>
 						@endif
 						@if(Request::path() == 'browse/characters')
 							<li>{{ HTML::link(Request::path().'/'.$comic->character_name, $comic->character_name) }}</li>
 						@endif
-						@if(Request::path() == 'browse/year')
+						@if(Request::path() == 'browse/years')
 							<li>{{ HTML::link(Request::path().'/'.$comic->year, $comic->year) }}</li>
 						@endif
 					</div>
@@ -47,3 +47,8 @@
 			@endforeach
 	</div>
 </div>
+<script>
+	$.(document).ready(function() {
+		$('a').click()
+	})
+</script>

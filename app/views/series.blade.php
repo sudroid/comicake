@@ -11,7 +11,7 @@
 			<dl class="dl-horizontal">	
 				<dt>Genre:<dt> 
 					@foreach($book_genre as $genre)
-						<dd>{{ HTML::link('browse/genre/'.$genre->genre_name, $genre->genre_name ) }}</dd>
+						<dd>{{ HTML::link('browse/genres/'.$genre->genre_name, $genre->genre_name ) }}</dd>
 					@endforeach
 				<dt>Publisher:<dt> <dd> {{ HTML::link('browse/publishers/'.$book_info[0]->publisher_name, $book_info[0]->publisher_name ) }}</dd>
 				<dt>SERIES SUMMARY:<dt> <dd>{{ $book_info[0]->book_description }}</dd>
@@ -25,7 +25,9 @@
 			@if(Auth::check())
 				{{ HTML::link('content/series/'.$book_title.'/edit', 'EDIT SERIES INFORMATION', array('class'=>'btn btn-primary btn-block'))}}
 				{{ HTML::link('content/issue/create', 'ADD NEW ISSUE', array('class'=>'btn btn-primary btn-block'))}}
-				{{ HTML::link('#', 'DELETE SERIES', array('class'=>'btn btn-primary btn-block', 'id'=>'delete'))}}
+				@if(Auth::user()->admin) 
+					{{ HTML::link('#', 'DELETE SERIES', array('class'=>'btn btn-primary btn-block', 'id'=>'delete'))}}
+				@endif
 				<br />
 				{{ Form::open(array('url' => 'read/'.$book_title, 'method' => 'POST')) }}
 				 	{{ Form::hidden('read_status', $read_status) }}
