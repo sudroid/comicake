@@ -58,22 +58,24 @@
 		</div>
 	</div>
 </div>
-@if(Auth::user()->admin)
-<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
-	<div class="modal-dialog modal-lg">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-				<h4 class="modal-title" id="deleteModalLabel">Are you sure you want to delete <em>{{ strtoupper($book_title) }}</em>?</h4>
-			</div>
-			<div class="modal-body">
-				{{ Form::open(array('url' => 'content/series/' . $book_title, 'method' => 'delete')) }}
-				 	{{ Form::hidden('_method', 'DELETE') }}
-				 	{{ Form::label('This is only for admins.')}}
-					{{ Form::submit('Delete this series', array('class'=>'btn btn-large btn-warning pull-right')) }}
-				{{ Form::close() }}
+@if(Auth::check())
+	@if(Auth::user()->admin)
+	<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4 class="modal-title" id="deleteModalLabel">Are you sure you want to delete <em>{{ strtoupper($book_title) }}</em>?</h4>
+				</div>
+				<div class="modal-body">
+					{{ Form::open(array('url' => 'content/series/' . $book_title, 'method' => 'delete')) }}
+					 	{{ Form::hidden('_method', 'DELETE') }}
+					 	{{ Form::label('This is only for admins.')}}
+						{{ Form::submit('Delete this series', array('class'=>'btn btn-large btn-warning pull-right')) }}
+					{{ Form::close() }}
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
+	@endif
 @endif
