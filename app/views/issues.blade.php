@@ -20,7 +20,9 @@
 		@if(Auth::check())
 			<div class="col-md-4 pull-right">
 				{{ HTML::link('content/issue/'.$info->issue_id.'/edit', 'EDIT ISSUE INFORMATION', array('class'=>'btn btn-primary btn-block'))}}
-				{{ HTML::link('#', 'DELETE ISSUE', array('class'=>'btn btn-primary btn-block','id'=>'delete'))}}
+				@if(Auth::user()->admin) 
+					{{ HTML::link('#', 'DELETE ISSUE', array('class'=>'btn btn-primary btn-block','id'=>'delete'))}}
+				@endif
 				{{ HTML::link(URL::previous(), 'BACK', array('class'=>'btn btn-primary btn-block'))}}
 			</div>
 		@else
@@ -31,12 +33,13 @@
 		@endforeach
 	</div>
 </div>
+@if(Auth::check())
 <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
 	<div class="modal-dialog modal-lg">
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-				<h4 class="modal-title" id="deleteModalLabel">Are you sure you want to delete this issue?</em>?</h4>
+				<h4 class="modal-title" id="deleteModalLabel">Are you sure you want to delete this issue</em>?</h4>
 			</div>
 			<div class="modal-body">
 				{{ Form::open(array('url' => 'content/issue/' . $book_info[0]->issue_id, 'method' => 'delete')) }}
@@ -48,3 +51,4 @@
 		</div>
 	</div>
 </div>
+@endif

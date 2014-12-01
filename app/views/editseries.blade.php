@@ -2,7 +2,10 @@
 	<div class="col-md-1"></div>
 	<div class="col-md-10 pull-left text-left">
 		@if(Session::has('postMsg'))
-            <h3 class="alert alert-warning" role="alert">{{ Session::get('postMsg') }}</h3>
+            <div class="alert alert-warning alert-dismissible col-md-11" role="alert">
+				  <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+				  {{ Session::get('postMsg') }}
+			</div>
         @endif
 		{{ Form::open(array('route'=>array('content.series.update', $book_title), 'method'=>'PUT', 'id'=>'edit_content', 'files'=>true, 'class'=>'form-horizontal')) }}
 			@foreach($book_info as $info)

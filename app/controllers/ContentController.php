@@ -7,6 +7,8 @@ class ContentController extends BaseController {
 
 		$this->beforeFilter('csrf', array('on'=>'post'));
 		$this->beforeFilter('auth');
+		$this->beforeFilter('auth', array('only'=>array('store', 'edit', 'update')));
+		$this->beforeFilter('auth.admin', array('only'=>array('destroy')));
 	}
 
 	/**
@@ -17,7 +19,7 @@ class ContentController extends BaseController {
 	 */
 	public function index()
 	{
-		$data['genres'] = DB::table('comicdb_genre')->orderby('genre_name', 'asc')->lists('genre_name', 'id');
+		$data['genres'] = Genres::orderby('genre_name', 'asc')->lists('genre_name', 'id');
 		$this->layout->content = View::make('addseries', $data);
 	}
 
@@ -29,10 +31,13 @@ class ContentController extends BaseController {
 	 */
 	public function store()
 	{
+		$inputs = Input::only('book_name', 'publisher_name', 'author_name', 'artist_name');
+		Input::merge(array_map('trim', $inputs));
+		$this->createSession();
 		$rules = array(
 		    'book_name' => 'required|unique:comicdb_books',
 		    'publisher_name' => 'required|min:1',
-		    'book_description' => '',
+		    'book_description' => 'max:2000',
 		    'genres' => 'min:1', 
 		    'author_name' => 'required|min:1',
 		    'artist_name' => 'required|min:1',
@@ -50,8 +55,8 @@ class ContentController extends BaseController {
 			$author = strtolower(Input::get('author_name'));		
 			$artist = strtolower(Input::get('artist_name'));
 			$publisherExists = $publishers->where('publisher_name', $publisher)->select('id')->first();
-			$authorExists = DB::table('comicdb_authors')->where('author_name', $author)->select('id')->first();
-			$artistExists = DB::table('comicdb_artists')->where('artist_name', $artist)->select('id')->first();
+			$authorExists = Authors::where('author_name', $author)->select('id')->first();
+			$artistExists = Artists::where('artist_name', $artist)->select('id')->first();
 			
 			if (isset($publisherExists->id))
 			{
@@ -68,7 +73,7 @@ class ContentController extends BaseController {
 			}
 			else 
 			{
-				$author_id = DB::table('comicdb_authors')->insertGetId(array('author_name'=>$author));
+				$author_id = Authors::insertGetId(array('author_name'=>$author));
 				
 			}
 
@@ -79,7 +84,7 @@ class ContentController extends BaseController {
 			}
 			else 
 			{
-				$artist_id = DB::table('comicdb_artists')->insertGetId(array('artist_name'=>$artist));
+				$artist_id = Artists::insertGetId(array('artist_name'=>$artist));
 				
 			}
 
@@ -101,12 +106,12 @@ class ContentController extends BaseController {
 
 			//Add issue character information into the comicdb_character table and keys into the comicdb_characterbook table
 			foreach (Input::get('characters') as $key => $character){
-				$character_id = DB::table('comicdb_characters')->insertGetId(array('character_name'=>$character));
+				$character_id = Characters::insertGetId(array('character_name'=>$character));
 				DB::table('comicdb_characterbook')->insert(array('book_id_FK'=>$comic->id, 'character_id_FK'=>$character_id));
 			}	
 
 			//Add issues information to comicdb_issues
-			DB::table('comicdb_issues')->insert(
+			Comicissues::insert(
 				array(
 						'book_id'=>$comic->id, 
 						'issue_id'=>1, 
@@ -114,13 +119,14 @@ class ContentController extends BaseController {
 						'author_id_FK'=>$author_id,
 						'summary'=>Input::get('issue_summary'),
 						'published_date' => Input::get('published_date'),
-						'cover_image' => 'img/comic_covers/'.$fileName
+						'cover_image' => 'img/comic_covers/'.$fileName,
+						'created_at' => date('Y-m-d H:i:s', time())
 					)
 			);
 			
 			return Redirect::to('browse')->with('postMsg', 'Thanks for submiting!');
 		} else {
-			return Redirect::to('content/series')->with('postMsg', 'Whoops! Looks like you got some errors.')->withErrors($validator)->withInput();
+			return Redirect::to('content/series')->with('postMsg', 'Whoops! Looks like you got some errors.')->withErrors($validator);
 		}
 	}
 
@@ -142,12 +148,12 @@ class ContentController extends BaseController {
 			$data['book_info'] = $comic->series($title)->select('comicdb_books.id as id', 'book_name', 'publisher_name', 'book_description')->distinct()->get();
 			$data['selected_genres'] = $comic->series($title)->select('comicdb_genre.id', 'genre_name')->distinct()->get();
 			$data['book_characters'] = $comic->bookcharacters($title)->select('character_name')->distinct()->get();
-			$data['book_genres'] = DB::table('comicdb_genre')->lists('genre_name', 'id');
+			$data['book_genres'] = Genres::lists('genre_name', 'id');
 			$this->layout->content = View::make('editseries', $data);
 		}
 		else 
 		{
-			return Redirect::to('editseries')->with('postMsg', 'These are not the comics you are looking for.');
+			return Redirect::to('editseries')->with('postMsg', 'These are not the comics you are looking for.')->withErrors($validator)->withInput();
 		}
 	}
 
@@ -160,10 +166,11 @@ class ContentController extends BaseController {
 	 */
 	public function update($title)
 	{
+		//Input::merge(array_map('trim', Input::all()));
 		$rules = array(
 		    'book_name' => 'required|min:1',
 		    'publisher_name' => 'required|min:1',
-		    'book_description' => '',
+		    'book_description' => 'max:2000',
 		    'genres' => 'min:1',
 		    'characters' => 'min:1' 
  		);
@@ -171,8 +178,9 @@ class ContentController extends BaseController {
  		$validator = Validator::make(Input::all(), $rules);
  		$comic = new Comicbooks;
  		$book_id = $comic->series($title)->select('comicdb_books.id')->first();
-
-		if ($book_id)
+ 		// $data['book_id'] = $book_id->id;
+ 		// $this->layout->content = View::make('test', $data);
+		if (isset($book_id->id))
 		{
 			if ($validator->passes()) {
 				$publishers = new Publishers;
@@ -189,8 +197,7 @@ class ContentController extends BaseController {
 				else {
 					$publisher_id = $publishers->insertGetId(array('publisher_name'=> $publisher));
 				}
-
-				$update_comic = $comic->findOrFail($book_id[0]->id);
+				$update_comic = $comic->findOrFail($book_id->id);
 				$update_comic->book_name = $book_name;
 				$update_comic->book_description = Input::get('book_description');
 				$update_comic->publisher_id_FK = $publisher_id;
@@ -205,8 +212,8 @@ class ContentController extends BaseController {
 				//Add issue character information into the comicdb_character table and keys into the comicdb_characterbook table
 				DB::table('comicdb_characterbook')->where('book_id_FK', $update_comic->id)->delete();
 				foreach (Input::get('characters') as $key => $character){
-					$character_id = DB::table('comicdb_characters')->insertGetId(array('character_name'=>$character));
-					DB::table('comicdb_characterbook')->insert(array('book_id_FK'=>$comic->id, 'character_id_FK'=>$character_id));
+					$character_id = Characters::insertGetId(array('character_name'=>$character));
+					DB::table('comicdb_characterbook')->insert(array('book_id_FK'=>$update_comic->id, 'character_id_FK'=>$character_id));
 				}	
 
 				return Redirect::to('browse')->with('postMsg', 'The book has been updated!');
@@ -239,6 +246,26 @@ class ContentController extends BaseController {
 		} else {
 			return Redirect::to(URL::previous())->with('postMsg', 'Whoops! Looks like you got some errors.');
 		}
+	}
+
+	public function createSession() {
+		Session::put(array(
+ 				'book_name'	 => Input::get('book_name'),
+				'publisher_name' 	 => Input::get('publisher_name'),
+				'book_description'  	 => Input::get('book_description'),
+				'author_name' => Input::get('author_name'),
+				'artist_name'  	 => Input::get('artist_name'),
+				'issue_summary'  => Input::get('issue_summary')
+		));
+	}
+
+	public function destorySession(){
+		Session::forget('book_name');
+		Session::forget('publisher_name');
+		Session::forget('book_description');
+		Session::forget('author_name');
+		Session::forget('artist_name');
+		Session::forget('issue_summary');
 	}
 
 }

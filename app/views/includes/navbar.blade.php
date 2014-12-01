@@ -8,7 +8,7 @@
                 <p class="navbar-text navbar-left">{{ HTML::link('register', 'REGISTER') }}</p>
                 <p class="navbar-text navbar-left">{{ HTML::link('login', 'LOGIN') }}</p>
             @else
-                <p class="navbar-text navbar-left"><a href="dashboard"><span class="glyphicon glyphicon-user"></span></p>
+                <p class="navbar-text navbar-left"><a href="/dashboard"><span class="glyphicon glyphicon-user"></span></p>
                 <p class="navbar-text navbar-left">{{ HTML::link('logout', 'LOGOUT') }} ( {{ Auth::user()->username; }})</p> 
             @endif
         </div>

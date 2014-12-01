@@ -79,4 +79,14 @@ $(function () {
     $("#delete").click(function(){
         $('#deleteModal').modal();
     });
+    $('#deactivateModal').appendTo("body");
+    $("#deactivate").click(function(){
+        $('#deactivateModal').modal();
+    });
+
+    $('#deleteUserModal').appendTo("body");
+    $(".deleteUser").click(function(){
+        $('#deleteUserModal').modal();
+    });
+  
 });

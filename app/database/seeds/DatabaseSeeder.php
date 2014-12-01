@@ -22,22 +22,20 @@ class UserTableSeeder extends Seeder {
     {
         DB::table('comicdb_users')->delete();
         User::create(array(
-                'userID' => 1,
-                'username' => 'tester',
-                'password' => Hash::make('mypass1'),
-                'userSQ' => Hash::make('your birthday year is?'),
-				'userSA' => Hash::make('1989'),
-                'created_at' => new DateTime,
-                'updated_at' => new DateTime
+                'username'      => 'adminuser',
+                'password'      => Hash::make('adminpass'),
+                'email'         => 'sus.chan6@gmail.com',
+                'created_at'    => new DateTime,
+                'updated_at'    => new DateTime
         ));
         User::create(array(
-                'userID' => 2,
-                'username' => 'tester2',
-                'password' => Hash::make('mypass2'),
-                'userSQ' => Hash::make('your birthday year is?'),
-				'userSA' => Hash::make('none of your business'),
-                'created_at' => new DateTime,
-                'updated_at' => new DateTime
+                'username'      => 'useruser',
+                'password'      => Hash::make('userpass'),
+                'email'         => 'shue.chan@mohawkcollege.ca',
+                'created_at'    => new DateTime,
+                'updated_at'    => new DateTime
         ));    
     }
 }
+
+

@@ -11,10 +11,10 @@ class User extends Eloquent implements UserInterface, RemindableInterface {
 	protected $fillable = array('username', 'email', 'admin', 'active', 'created_at', 'updated_at');
 
 	public static $rules = array(
-	    'username' => 'required|alpha_dash|min:6',
+	    'username' => 'required|alpha_num|between:6,11|unique:comicdb_users',
 	    'email' => 'required|email|unique:comicdb_users',
-	    'password' => 'required|alpha_num|between:6,12|confirmed',
-	    'password_confirmation' => 'required|alpha_num|between:6,12'
+	    'password' => 'required|alpha_symbols|between:6,12|confirmed',
+	    'password_confirmation' => 'required'
 	);
 
 	use UserTrait, RemindableTrait;

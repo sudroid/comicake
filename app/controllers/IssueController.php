@@ -6,19 +6,10 @@ class IssueController extends BaseController {
 	public function __construct() {
 
 		$this->beforeFilter('csrf', array('on'=>'post'));
-		$this->beforeFilter('auth');
-	}
+		$this->beforeFilter('auth', array('only'=>array('create', 'store', 'update')));
+		$this->beforeFilter('auth.admin', array('only'=>array('destroy')));
 
-	/**
-	 * Display a listing of the resource.
-	 *
-	 * @return Response
-	 */
-	public function index()
-	{
-		//nothing here
 	}
-
 
 	/**
 	 * Show the form for creating a new resource.
@@ -30,9 +21,9 @@ class IssueController extends BaseController {
 		$title = Session::get('book_title');
 		if (Comicbooks::series($title)->select('comicdb_books.id')->first())
 		{
-			$data['book_title'] = '<em>'.strtoupper($title).'</em>';
-			$data['book_id'] = Comicbooks::series($title)->select('comicdb_books.id')->first();
-			$this->layout->content = View::make('addissues', $data);
+			$data['book_title'] 	= '<em>'.strtoupper($title).'</em>';
+			$data['book_id'] 		= Comicbooks::series($title)->select('comicdb_books.id')->first();
+			$this->layout->content 	= View::make('addissues', $data);
 		}
 		else 
 		{
@@ -48,38 +39,35 @@ class IssueController extends BaseController {
 	 */
 	public function store()
 	{
+		//Trim all inputs 
+		Input::merge(array_map('trim', Input::all()));
 		$rules = array(
-			'issue_number' => 'required|numeric',
-		    'author_name' => 'required|min:1',
-		    'artist_name' => 'required|min:1',
+			'issue_number' 	 => 'required|numeric|min:2|unique:comicdb_issues,issue_id,null,book_id,book_id,'.Input::get("id"),
+		    'author_name' 	 => 'required|min:5',
+		    'artist_name' 	 => 'required|min:5',
 		    'published_date' => 'required|date_format:yy-m-d',
-		    'issue_summary' => '',
-		    'cover_image' => 'required|image',
+		    'issue_summary'  => 'max:2000',
+		    'cover_image' 	 => 'required|image',
  		);
- 		Session::put('issue_number', Input::get('issue_number'));
- 		Session::put('author_name', Input::get('author_name'));
- 		Session::put('artist_name', Input::get('artist_name'));
- 		Session::put('published_date', Input::get('published_date'));
- 		Session::put('issue_summary', Input::get('issue_summary'));
-
+ 		$this->createSession();
 		$validator = Validator::make(Input::all(), $rules);
 		$comic_title = Comicbooks::find(Input::get('id'));
 		if ($validator->passes()) {
 			$comic_issues = new Comicissues;
 			$author = Str::lower(Input::get('author_name'));		
 			$artist = Str::lower(Input::get('artist_name'));
-			$authorExists = DB::table('comicdb_authors')->where('author_name', $author)->select('id')->first();
-			$artistExists = DB::table('comicdb_artists')->where('artist_name', $artist)->select('id')->first();
+			$authorExists = Authors::where('author_name', $author)->select('id')->first();
+			$artistExists = Artists::where('artist_name', $artist)->select('id')->first();
 			
 			if(isset($authorExists))
 				$author_id = $authorExists->id;
 			else 
-				$author_id = DB::table('comicdb_authors')->insertGetId(array('author_name'=>$author));
+				$author_id = Authors::insertGetId(array('author_name'=>$author));
 
 			if(isset($artistExists))
 				$artist_id = $artistExists->id;
 			else 
-				$artist_id = DB::table('comicdb_artists')->insertGetId(array('artist_name'=>$artist));
+				$artist_id = Artists::insertGetId(array('artist_name'=>$artist));
 
 			if (Input::hasFile('cover_image'))
 			{
@@ -96,31 +84,14 @@ class IssueController extends BaseController {
 			$comic_issues->published_date = Input::get('published_date');
 			$comic_issues->cover_image = 'img/comic_covers/'.$fileName;
 			$comic_issues->save();
-			
-			Session::forget('issue_number');
-	 		Session::forget('author_name');
-	 		Session::forget('artist_name');
-	 		Session::forget('published_date');
-	 		Session::forget('issue_summary');
-	 		Session::forget('book_title');
+
+			$this->destorySession();
+
 			return Redirect::to('browse/series/'.$comic_title->book_name)->with('postMsg', 'Thanks for submiting!');
 		} else {
-			return Redirect::to('content/issue/create')->with('postMsg', 'Whoops! Looks like you got some errors.')->withErrors($validator);
+			return Redirect::to('content/issue/create')->with('postMsg', 'Whoops! Looks like you got some errors.')->withErrors($validator)->withInput();
 		}
 	}
-
-
-	/**
-	 * Display the specified resource.
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
-	public function show($id)
-	{
-		//
-	}
-
 
 	/**
 	 * Show the form for editing the specified resource.
@@ -157,22 +128,14 @@ class IssueController extends BaseController {
 	 */
 	public function update($id)
 	{
+		Input::merge(array_map('trim', Input::all()));
 		$rules = array(
-
-			'issue_number' => 'required|numeric',
-		    'author_name' => 'required|min:1',
-		    'artist_name' => 'required|min:1',
+		    'author_name' 	 => 'required|min:5',
+		    'artist_name' 	 => 'required|min:5',
 		    'published_date' => 'required|date_format:yy-m-d',
-		    'issue_summary' => '',
-		    'cover_image' => 'image',
+		    'issue_summary'  => 'max:2000'
  		);
-
- 		Session::put('issue_number', Input::get('issue_number'));
- 		Session::put('author_name', Input::get('author_name'));
- 		Session::put('artist_name', Input::get('artist_name'));
- 		Session::put('published_date', Input::get('published_date'));
- 		Session::put('issue_summary', Input::get('issue_summary'));
-
+ 		$this->createSession();
  		//Laravel / Eloquent doesn't support composite primary keys...
 
  		$validator = Validator::make(Input::all(), $rules);
@@ -185,24 +148,25 @@ class IssueController extends BaseController {
 				$comic_issues = new Comicissues;
 				$author = Str::lower(Input::get('author_name'));		
 				$artist = Str::lower(Input::get('artist_name'));
-				$authorExists = DB::table('comicdb_authors')->where('author_name', $author)->select('id')->first();
-				$artistExists = DB::table('comicdb_artists')->where('artist_name', $artist)->select('id')->first();
+				$authorExists = Authors::where('author_name', $author)->select('id')->first();
+				$artistExists = Artists::where('artist_name', $artist)->select('id')->first();
 				
 				if(isset($authorExists))
 					$author_id = $authorExists->id;
 				else 
-					$author_id = DB::table('comicdb_authors')->insertGetId(array('author_name'=>$author));
+					$author_id = Authors::insertGetId(array('author_name'=>$author));
 
 				if(isset($artistExists))
 					$artist_id = $artistExists->id;
 				else 
-					$artist_id = DB::table('comicdb_artists')->insertGetId(array('artist_name'=>$artist));
+					$artist_id = Artists::insertGetId(array('artist_name'=>$artist));
 
 				$update_array = array(	'issue_id' => Input::get('issue_number'), 
 						 				'author_id_FK'=> $author_id, 
 						 				'artist_id_FK' => $artist_id,
 						 				'summary' => Input::get('issue_summary'),
-						 				'published_date' => Input::get('published_date'));
+						 				'published_date' => Input::get('published_date'),
+						 				'updated_at' => date('Y-m-d H:i:s', time())			 				);
 
 				if (Input::hasFile('cover_image'))
 				{
@@ -215,18 +179,13 @@ class IssueController extends BaseController {
 				Comicissues::where('book_id', Input::get('id'))->where('issue_id', Input::get('issue_number'))
 							 ->update($update_array);
 				
-
+				$this->destorySession();
 				return Redirect::to('browse/series/'.$comic_title->book_name)->with('postMsg', 'Thanks for submiting!');
 			} else {
 				return Redirect::to(URL::previous())->with('postMsg', 'Whoops! Looks like you got some errors.')->withErrors($validator)->withInput();
 			}
 		}
-		Session::forget('issue_number');
- 		Session::forget('author_name');
- 		Session::forget('artist_name');
- 		Session::forget('published_date');
- 		Session::forget('issue_summary');
- 		Session::forget('book_title');
+		$this->destorySession();
 		return Redirect::to(URL::previous())->with('postMsg', 'Looks like that issue already exists!');
 	}
 
@@ -252,5 +211,23 @@ class IssueController extends BaseController {
 
 	}
 
+	public function createSession() {
+		Session::put(array(
+ 				'issue_number'	 => Input::get('issue_number'),
+				'author_name' 	 => Input::get('author_name'),
+				'artist_name'  	 => Input::get('artist_name'),
+				'published_date' => Input::get('published_date'),
+				'issue_summary'  => Input::get('issue_summary')
+		));
+	}
+
+	public function destorySession(){
+		Session::forget('issue_number');
+		Session::forget('author_name');
+		Session::forget('artist_name');
+		Session::forget('published_date');
+		Session::forget('issue_summary');
+		Session::forget('book_title');
+	}
 
 }

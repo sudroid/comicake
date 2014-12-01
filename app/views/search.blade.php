@@ -50,4 +50,7 @@
 			</ul>
 		</div>
 	</div> 
+	<div class="col-md-12 bottom">
+		<p>Didn't find what you were looking for? If it's missing, you should add it.</p>
+	</div>
 </div>

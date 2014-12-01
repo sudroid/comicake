@@ -5,7 +5,10 @@
 		{{Session::put('book_title', $book_title);}}
 		<br />
 		@if(Session::has('postMsg'))
-            <h3 class="alert alert-warning" role="alert">{{ Session::get('postMsg') }}</h3>
+            <div class="alert alert-warning alert-dismissible col-md-11" role="alert">
+			  <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+			  {{ Session::get('postMsg') }}
+			</div>
         @endif
 		<div class="col-md-8 pull-left text-uppercase text-left">
 			<dl class="dl-horizontal">	
@@ -55,6 +58,7 @@
 		</div>
 	</div>
 </div>
+@if(Auth::user()->admin)
 <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
 	<div class="modal-dialog modal-lg">
 		<div class="modal-content">
@@ -72,3 +76,4 @@
 		</div>
 	</div>
 </div>
+@endif

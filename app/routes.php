@@ -47,4 +47,5 @@ Route::controller('password', 'RemindersController');
 Route::get('/', 'HomeController@showWelcome');
 
 //User Controller
+Route::delete('users/{id}', ['uses' => 'UsersController@destroy', 'as'=>'users.destroy']);
 Route::controller('/', 'UsersController');

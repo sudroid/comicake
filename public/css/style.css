@@ -159,7 +159,7 @@ h1 {
 	color: black !important;
 }
 
-.search {
+.search, .row {
 	height:600px;
 }
 
@@ -215,4 +215,9 @@ th {
 .admin-dash-profile {
 	background-color: #428BCA;
 	margin-bottom:20px;
+}
+
+.bottom {
+	position: fixed;
+	bottom: 0px;
 }

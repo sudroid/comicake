@@ -4,19 +4,21 @@
 		<div class="page-header"><h1>{{ $title }}</h1></div>
 		<br />
 		@if(Session::has('postMsg'))
-			{{ Session::get('postMsg') }}
+			 <div class="alert alert-warning alert-dismissible col-md-12" role="alert">
+				  <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+				  {{ Session::get('postMsg') }}
+			</div>
         @endif
 			@foreach($comics as $comic)
 				@if(Request::path() == 'browse')
 					<div class="col-md-3 pull-left">
 						<a href="#" data-target="drop-panel" class="hcaption" cap-effect="fade">
-							{{ HTML::image($comic->cover_image, $comic->issue_id . $comic->book_id, array('width' => '100%')); }}
+							{{ HTML::image($comic->cover_image, $comic->issue_id . $comic->book_id, array('width' => '242px', 'height'=> '373px')); }}
 						</a>
 						<div id="myToggle" class="cap-overlay">
-							<h2 class="text-uppercase">{{ $comic->book_name.' #'.$comic->issue_id }}</h2>
-							<br />
+							<h2 class="text-uppercase">{{ HTML::link(Request::path().'/series/'.$comic->book_name, $comic->book_name) }}<br/> {{ '#'.$comic->issue_id }}</h2>
 							<p>{{ $comic->summary }}</p>
-							<a class='btn btn-primary' href="{{ URL::current() }}/series/{{ $comic->book_name }}/{{ $comic->issue_id }}">read more...</a>
+							{{ HTML::link(Request::path().'/series/'.$comic->book_name.'/'.$comic->issue_id , 'read more...', array('class'=>'btn btn-primary') ) }}
 						</div>
 					</div>
 				@else

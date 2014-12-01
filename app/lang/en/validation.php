@@ -70,6 +70,7 @@ return array(
 	),
 	"unique"               => "The :attribute has already been taken.",
 	"url"                  => "The :attribute format is invalid.",
+	"alpha_symbols"     => "The :attribute must contain letters, numbers and one symbol (ex: !@#$%). And :attribute must start with letters and numbers.",
 
 	/*
 	|--------------------------------------------------------------------------
