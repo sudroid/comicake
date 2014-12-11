@@ -97,26 +97,26 @@
 	});
 	var ctxUpload = $('#admin-stats').get(0).getContext("2d");
     var dataUpload = {
-        labels: {{ $created_issues_date }},
+        labels: {{ $created_dates }},
 	    datasets: [
 	        { 
 	        	label: "Books Uploaded",
-	            fillColor: "rgba(220,220,220,0.2)",
-	            strokeColor: "rgba(220,220,220,1)",
-	            pointColor: "rgba(220,220,220,1)",
+	            fillColor: "rgba(29,29,42,0.2)",
+	            strokeColor: "rgba(29,29,42,1)",
+	            pointColor: "rgba(29,29,42,1)",
 	            pointStrokeColor: "#fff",
 	            pointHighlightFill: "#fff",
-	            pointHighlightStroke: "rgba(220,220,220,1)",
+	            pointHighlightStroke: "rgba(29,29,42,1)",
 	            data: {{ $created_books }}
 	        },
 	        { 
 	        	label: "Issues Uploaded",
-	            fillColor: "rgba(151,187,205,0.2)",
-	            strokeColor: "rgba(151,187,205,1)",
-	            pointColor: "rgba(151,187,205,1)",
+	            fillColor: "rgba(94, 249, 255,0.2)",
+	            strokeColor: "rgba(94, 249, 255,,1)",
+	            pointColor: "rgba(94, 249, 255,1)",
 	            pointStrokeColor: "#fff",
 	            pointHighlightFill: "#fff",
-	            pointHighlightStroke: "rgba(151,187,205,1)",
+	            pointHighlightStroke: "rgba(94, 249, 255,1)",
 	            data: {{ $created_issues }}
 	        }, 
 	    ]

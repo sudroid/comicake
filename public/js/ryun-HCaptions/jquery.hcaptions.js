@@ -41,7 +41,7 @@
 			var overlay_w = opts.width || w,
 				overlay_h = opts.height || h;
 
-			$target.css({ 'width':overlay_w, 'height':overlay_h, 'position':'absolute', 'z-index':33, overflow: 'hidden' });
+			$target.css({ 'height':overlay_h, 'position':'absolute', 'z-index':33, overflow: 'hidden' });
 
 			var _overlay_css = {};
 			

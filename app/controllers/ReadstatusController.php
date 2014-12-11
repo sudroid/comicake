@@ -1,9 +1,23 @@
 <?php
 
 class ReadstatusController extends BaseController {
-
+	
+	//Protected variable - master layout
 	protected $layout = "layouts.master";
 
+	/*
+	*	Constructor sets beforeFilters 
+	*/
+	public function __construct() {
+
+		$this->beforeFilter('csrf', array('on'=>'post'));
+		$this->beforeFilter('auth', array('only'=>array('postRead', 'postReading')));
+
+	}
+
+	/*
+	*	postRead inserts/updates the Read status of a comicbook series
+	*/
 	public function postRead()
 	{
 		$title = urldecode(Request::segment(2));
@@ -26,6 +40,9 @@ class ReadstatusController extends BaseController {
 		}
 	}
 
+	/*
+	*	postReading inserts/updates the To Read status of a comicbook series
+	*/
 	public function postReading()
 	{
 		$title = urldecode(Request::segment(2));

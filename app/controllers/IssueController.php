@@ -1,8 +1,13 @@
 <?php
 
 class IssueController extends BaseController {
+
+	//Protected variable - master layout
 	protected $layout = "layouts.master";
 
+	/*
+	*	Constructor sets beforeFilters
+	*/
 	public function __construct() {
 
 		$this->beforeFilter('csrf', array('on'=>'post'));
@@ -12,7 +17,7 @@ class IssueController extends BaseController {
 	}
 
 	/**
-	 * Show the form for creating a new resource.
+	 * Show the form for adding a new issue to the database
 	 *
 	 * @return Response
 	 */
@@ -33,7 +38,7 @@ class IssueController extends BaseController {
 
 
 	/**
-	 * Store a newly created resource in storage.
+	 * Save the issue in to the database.
 	 *
 	 * @return Response
 	 */
@@ -71,7 +76,7 @@ class IssueController extends BaseController {
 
 			if (Input::hasFile('cover_image'))
 			{
-				$fileName = Input::get('issue_number').'_Cov_'.Str::random(10).'.'.Input::file('cover_image')->getClientOriginalExtension();
+				$fileName = $comic_title->book_name.Input::get('issue_number').'_Cov_'.Str::random(10).'.'.Input::file('cover_image')->getClientOriginalExtension();
 				$cover_image = Input::file('cover_image')->move('public/img/comic_covers/', $fileName);
 			}
 
@@ -121,7 +126,7 @@ class IssueController extends BaseController {
 
 
 	/**
-	 * Update the specified resource in storage.
+	 * Update an issue in the database
 	 *
 	 * @param  int  $id
 	 * @return Response
@@ -161,7 +166,7 @@ class IssueController extends BaseController {
 				else 
 					$artist_id = Artists::insertGetId(array('artist_name'=>$artist));
 
-				$update_array = array(	'issue_id' => Input::get('issue_number'), 
+				$update_array = array(	 
 						 				'author_id_FK'=> $author_id, 
 						 				'artist_id_FK' => $artist_id,
 						 				'summary' => Input::get('issue_summary'),
@@ -170,13 +175,13 @@ class IssueController extends BaseController {
 
 				if (Input::hasFile('cover_image'))
 				{
-					$fileName =  Session::get('book_title').Input::get('issue_number').'_Cov_'.Str::random(10).'.'.Input::file('cover_image')->getClientOriginalExtension();
+					$fileName =  $comic_title->book_name.$id.'_Cov_'.Str::random(10).'.'.Input::file('cover_image')->getClientOriginalExtension();
 					$cover_image = Input::file('cover_image')->move('public/img/comic_covers/', $fileName);
 					$update_array['cover_image'] = 'img/comic_covers/'.$fileName;
 				}
 
 				//Add issue information to comicdb_books
-				Comicissues::where('book_id', Input::get('id'))->where('issue_id', Input::get('issue_number'))
+				Comicissues::where('book_id', Input::get('id'))->where('issue_id', $id)
 							 ->update($update_array);
 				
 				$this->destorySession();
@@ -191,26 +196,38 @@ class IssueController extends BaseController {
 
 
 	/**
-	 * Remove the specified resource from storage.
+	 * Remove an issue from the database.
 	 *
 	 * @param  int  $id
 	 * @return Response
 	 */
 	public function destroy($id)
 	{
+		$msg = 'The issue has been deleted.';
 		$title = Session::get('book_title');
 		$data['issue_id'] = $id;
 		$book_issue = Comicissues::issues($title, $id)->select('book_id', 'issue_id')->first();
 		if ($book_issue)
 		{
+			$count = Comicissues::issuescount($title)->count();
+			if ($count<=1){
+				$content = new ContentController();
+				$content->destroy($title);
+				$msg = 'The series and issue has been deleted.';
+			}
 			Comicissues::where('book_id', $book_issue->book_id)->where('issue_id', $book_issue->issue_id)->delete();
-		return Redirect::to('browse')->with('postMsg', 'The issue has been deleted.');
+			
+			
+		return Redirect::to('browse')->with('postMsg', $msg);
 		} else {
 			return Redirect::to(URL::previous())->with('postMsg', 'Whoops! Looks like you got some errors.');
 		}
 
 	}
 
+	/*
+	*	Create session data
+	*/
 	public function createSession() {
 		Session::put(array(
  				'issue_number'	 => Input::get('issue_number'),
@@ -220,7 +237,10 @@ class IssueController extends BaseController {
 				'issue_summary'  => Input::get('issue_summary')
 		));
 	}
-
+	
+	/*
+	*	Destroy session data
+	*/
 	public function destorySession(){
 		Session::forget('issue_number');
 		Session::forget('author_name');

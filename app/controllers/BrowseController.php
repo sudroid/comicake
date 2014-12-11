@@ -1,16 +1,24 @@
 <?php
 
-//NOTE: http://fideloper.com/laravel-raw-queries 
-
 class BrowseController extends BaseController {
 
+	//Protected variables
 	protected $layout = "layouts.master";
 
 	protected $msg = '<div class="alert alert-warning alert-dismissible fade in" role="alert">
 			      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
 			      <strong>Oops!</strong> There\'s nothing here.
 			    </div>';
+    protected $comicvine_url = "http://www.comicvine.com/api";
+    protected $cbr_url = "http://www.comicbookresources.com/feed.php?feed=news";
+    protected $api_key = "f195f882d737aee5bca1c43ac44a224b15307a1c";
 
+    /*
+    * 	Get browse latest view
+    *	Retrieves the last four issues uploaded to the database
+    * 	Summary is cut down to 200 characters. 
+    * 	This also gets the xml data from comicbookresource rss feed for the feed on the browse latest page
+    */
 	public function getIndex()
 	{
 		$data['title'] 	= "The latest...";
@@ -24,33 +32,46 @@ class BrowseController extends BaseController {
 				$data['comics'][$count]->summary = substr($summary, 0, 200).'...'; 
 			} 
 		}
+
+		if ($response_xml_data = file_get_contents($this->cbr_url))
+		{
+			$xml_data = simplexml_load_string($response_xml_data);
+			foreach($xml_data->channel->item as $item) {
+				$data['news_item'][] = $item;
+			}
+		}
 		$this->layout->content = View::make('browse', $data);
 	}
 
+	/*
+	*	Get browse category page
+	* 	This will be according to the route request
+	* 	If it doesn't match any of the side panel options, then redirect to the Error page
+	*/
 	public function getBrowse($category){
 		$category_filtered = strtoupper(trim($category));
 		$data['title'] = $category_filtered;
 		switch($category_filtered):
 			case 'SERIES':
-				$data['comics'] = Comicbooks::get();
+				$data['comics'] = Comicbooks::orderBy('book_name', 'asc')->get();
 				break;
 			case 'AUTHORS':
-				$data['comics'] = Authors::get();
+				$data['comics'] = Authors::select('author_name')->orderBy('author_name', 'asc')->distinct()->get();
 				break;
 			case 'ARTISTS':
-				$data['comics'] = Artists::get();
+				$data['comics'] = Artists::select('artist_name')->orderBy('artist_name', 'asc')->distinct()->get();
 				break;
 			case 'CHARACTERS':
-				$data['comics'] = Characters::get();
+				$data['comics'] = Characters::select('character_name')->orderBy('character_name', 'asc')->distinct()->get();
 				break;
 			case 'PUBLISHERS':
-				$data['comics'] = Publishers::get();
+				$data['comics'] = Publishers::select('publisher_name')->orderBy('publisher_name', 'asc')->distinct()->get();
 				break;
 			case 'GENRES':
-				$data['comics'] = Genres::get();
+				$data['comics'] = Genres::orderBy('genre_name', 'asc')->get();
 				break;
 			case 'YEARS':
-				$data['comics'] = Comicissues::select(DB::raw('year(published_date) as year'))->distinct()->get();
+				$data['comics'] = Comicissues::select(DB::raw('year(published_date) as year'))->orderBy('published_date', 'asc')->distinct()->get();
 				break;
 			default: 
 				return Redirect::to('error');
@@ -59,6 +80,10 @@ class BrowseController extends BaseController {
 		$this->layout->content = View::make('browse', $data);
 	}
 
+	/*
+	*	Get a specific comicbook series information
+	* 	This includes the read list and the to-read list options
+	*/
 	public function getSeries($book)
 	{
 		// THIS INVOKES A STATIC METHOD SERIES
@@ -111,6 +136,9 @@ class BrowseController extends BaseController {
 		}
 	}
 
+	/*
+	* 	Get a specific comicbook series' issue information 
+	*/
 	public function getIssues($book, $issue_no){
 		$data['book_title'] = $book;
 		$data['book_issue'] = $issue_no;
@@ -123,60 +151,80 @@ class BrowseController extends BaseController {
 		$this->layout->content = View::make('issues', $data);
 	}
 
+	/*
+	* 	Get a specific Author information
+	* 	If the author doesn't have any information in the database, then 
+	* 	redirect user to the wikipedia page of them.
+	*/
 	public function getAuthors($author)
 	{
 		$data['author_name']  = $author;
 		$data['author_cover'] = Comicbooks::authors($author)
 	    										->select('cover_image')
-												->orderBy('published_date', 'desc')
+												->orderBy('published_date', 'asc')
 											   	->distinct()->get();
 		$data['author_works'] = Comicbooks::authors($author)
 									   ->select('book_name')
-									   ->orderBy('published_date', 'desc')
+									   ->orderBy('published_date', 'asc')
 									   ->distinct()->get();
 		$data['has_author']   = (count($data['author_works'])) ? true : false;
 		if (!$data['has_author']) {
-			return Redirect::to('error');
+			return Redirect::away("http://en.wikipedia.org/wiki/".ucwords($author));
 		}
 	    $this->layout->content = View::make('author', $data);
 	}
 
+	/*
+	* 	Get a specific Artist information
+	* 	If the artist doesn't have any information in the database, then 
+	* 	redirect user to the wikipedia page of them.
+	*/
 	public function getArtists($artist){
 		$data['artist_name']  = $artist;
 		$data['artist_cover'] = Comicbooks::artists($artist)
 	    										->select('cover_image')
-												->orderBy('published_date', 'desc')
+												->orderBy('published_date', 'asc')
 											   	->distinct()->get();
 		$data['artist_works'] = Comicbooks::artists($artist)
 									   ->select('book_name')
-									   ->orderBy('published_date', 'desc')
+									   ->orderBy('published_date', 'asc')
 									   ->distinct()->get();
 	    $data['has_artist']   = (count($data['artist_works'])) ? true : false;
 		if (!$data['has_artist']) {
-			return Redirect::to('error');
+			return Redirect::away("http://en.wikipedia.org/wiki/".ucwords($artist));
 		}
 		$this->layout->content = View::make('artist', $data);
 	}
 
+	/*
+	* 	Get a specific Publisher information
+	* 	If the publisher doesn't have any information in the database, then 
+	* 	redirect user to the wikipedia page of them.
+	*/
 	public function getPublishers($publisher){
 		$data['publisher_name']  = $publisher;
 		$data['publisher_cover'] = Comicbooks::publishers($publisher)
 	    										->select('cover_image')
-												->orderBy('published_date', 'desc')
+												->orderBy('published_date', 'asc')
 											   	->distinct()
 											   	->get();
 		$data['publisher_works'] = Comicbooks::publishers($publisher)
 								 		  ->select('book_name')
-										  ->orderBy('published_date', 'desc')
+										  ->orderBy('published_date', 'asc')
 										  ->distinct()
 										  ->get();
 		$data['has_publisher'] 	 = (count($data['publisher_works'])) ? true : false;
 		if (!$data['has_publisher']) {
-			return Redirect::to('error');
+			return Redirect::away("http://en.wikipedia.org/wiki/".ucwords($publisher));
 		}
 		$this->layout->content = View::make('publisher', $data);
 	}
 
+	/*
+	* 	Get a specific Genre information
+	* 	If the author doesn't have any information in the database, then 
+	* 	redirect user to the wikipedia page of them.
+	*/
 	public function getGenres($genre){
 		$data['genre_name'] = $genre;
 		$genre_list 		= Genres::lists('genre_name');
@@ -186,11 +234,11 @@ class BrowseController extends BaseController {
 		else {		
 			$data['genre_cover'] = Comicbooks::genres($genre)
 									  ->select('cover_image')
-									  ->orderBy('published_date', 'desc')
+									  ->orderBy('comicdb_books.created_at', 'desc')
 								   	  ->distinct()->get();
 			$data['genre_works'] = Comicbooks::genres($genre)
 									 		  ->select('book_name')
-											  ->orderBy('published_date', 'desc')
+											  ->orderBy('comicdb_books.created_at', 'desc')
 											  ->distinct()->get();
 		    $data['has_genre'] 	 = (count($data['genre_works'])) ? true : false;
 
@@ -201,35 +249,69 @@ class BrowseController extends BaseController {
 		$this->layout->content = View::make('genre', $data);
 	}
 
+	/*
+	* 	Get a specific Character information
+	* 	This will use the ComicVine API to get more information 
+	* 	about the character as well as what is in the database.
+	*   If the character doesn't have any information in the database, 
+	*	then redirect user to the wikipedia page of them.
+	*/
 	public function getCharacters($character){
 		$data['character_name']  = $character;
+		$xml_url = $this->comicvine_url."/characters/?api_key=".$this->api_key."&filter=name:".strtolower($character);
+		if ($response_xml_data = file_get_contents($xml_url)) {
+			$xml_data = simplexml_load_string($response_xml_data);
+			$character_data = $xml_data->results->character; 
+			if ( count($character_data) > 0 ) {
+				$data['detail_url'] = (string)$character_data->site_detail_url;
+				$aliases = $character_data->aliases;
+				$data['aliases'] = explode("\n", $aliases);
+				$data['appearances_count'] = $character_data->count_of_issue_appearances;
+				$data['image'] = (string)$character_data->image->medium_url;
+				$data['description'] = (string)$character_data->deck;
+				$data['publisher'] = strtolower((string)$character_data->publisher->name);
+			}
+			else {
+				$data['detail_url'] = "";
+				$data['aliases'] = "";
+				$data['appearances_count'] =  "";
+				$data['image'] =  "";
+				$data['description'] =  "";
+				$data['publisher'] = "";
+			}
+		}
 		$data['character_cover'] = Comicbooks::characters($character)
 									->select('cover_image')
-									->orderBy('published_date', 'desc')
+									->orderBy('published_date', 'asc')
 								   	->distinct()
 								   	->get();
 		$data['character_works'] = Comicbooks::characters($character)
 								 		  ->select('book_name')
-										  ->orderBy('published_date', 'desc')
+										  ->orderBy('published_date', 'asc')
 										  ->distinct()
 										  ->get();
 		$data['has_character'] 	 = (count($data['character_works'])) ? true : false;
 		if (!$data['has_character']) {
-			return Redirect::to('error');
+			return Redirect::away("http://en.wikipedia.org/wiki/".ucwords($character));
 		}
 		$this->layout->content = View::make('character', $data);
 	}
 
+	/*
+	* 	Get the issues that were published in a specific year 
+	* 	If the year doesn't have any information in the database, 
+	*	then redirect user to the wikipedia page of them.
+	*/
 	public function getYears($year){
 		$data['year_name'] 	= $year;
 		$data['year_cover'] = Comicbooks::years($year)
 									->select('cover_image')
-									->orderBy('published_date', 'desc')
+									->orderBy('published_date', 'asc')
 								   	->distinct()
 								   	->get();
 		$data['year_works'] = Comicbooks::years($year)
 								 		  ->select('book_name')
-										  ->orderBy('published_date', 'desc')
+										  ->orderBy('published_date', 'asc')
 										  ->distinct()
 										  ->get();
 		$data['has_year'] 	= (count($data['year_works'])) ? true : false;

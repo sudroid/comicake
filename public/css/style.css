@@ -12,6 +12,24 @@ body {
 	padding-top: 130px;
 }
 
+.thumbnail a > img {
+	height:280px!important;
+}
+
+#news_feed {
+	background-color:rgba(255, 255, 255, 0.30);
+	margin-top:10px;
+}
+
+#news_feed ul {
+	width:96%;
+}
+
+#news_feed li {
+	list-style: none;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.50);
+}
+
 .welcome {
 	width: 300px;
 	height: 200px;
@@ -20,6 +38,15 @@ body {
 	top: 50%;
 	margin-left: -150px;
 	margin-top: -100px;
+}
+
+.nav > li > a {
+	opacity: .9;
+}
+
+.nav > li > a:hover, .nav > li > a:focus {
+	background-color:rgba(0, 0, 0, 0);
+	opacity: 1;
 }
 
 .login {
@@ -61,27 +88,18 @@ h1 {
 	margin: 16px 0 0 0;
 }
 
-.sidebar {
-	margin-left:-2px;
-}
-
-.sidebar ul {
- 	margin-right:40px;
-}
-
 .sidebar ul li {
 	list-style: none;
-	padding-bottom:10px;
 }
 
 .sidebar ul a {
 	background: #428BCA;
 	color: #FFF;
 	display: block;
-	margin-bottom: 10px;
 	padding: 10px;
 	text-transform: uppercase;
 	text-decoration: none;
+	text-align:left;
 }
 
 .sidebar ul a:hover {
@@ -108,7 +126,7 @@ h1 {
 }
 
 .main {
-	padding-top:70px;
+	padding-top:20px;
 }
 
 .row {

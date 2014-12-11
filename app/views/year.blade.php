@@ -4,7 +4,7 @@
 		<h1 class="text-uppercase">{{ $year_name }}</h1>
 		<br />
 		<div class="col-md-6 pull-left text-left text-uppercase">
-			<h4>Latest...</h4>
+			<h4>Latest Additions...</h4>
 				<a href="{{'/browse/series/'.$year_works[0]->book_name }}">
 					{{ HTML::image($year_cover[0]->cover_image, $year_works[0]->book_name, array('width' => '75%')); }}
 				</a>

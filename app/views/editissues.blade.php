@@ -13,7 +13,7 @@
 				@foreach($book_info as $info)
 				<h1 class="jumbotron">EDIT ISSUE <em>#{{ $issue_id }}</em> OF {{ $book_title }}</h1>
 				<div class="col-md-4 pull-left thumbnail">
-					{{ HTML::image(URL::asset($info->cover_image), 'your image', array('id'=>'previewimg')) }}
+					{{ HTML::image($info->cover_image, 'your image', array('id'=>'previewimg')) }}
 					{{ Form::file('cover_image', array('class' => '', 'id'=>'previewbtn')); }}
 					<span class="has-error">{{ $errors->first('cover_image') }}</span>
 				</div>

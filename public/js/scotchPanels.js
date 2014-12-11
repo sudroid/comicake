@@ -210,8 +210,10 @@
 
                 panel.css({
                     'top': '0',
-                    'left': '-' + panel.settings.distanceX,
-                    'width': panel.settings.distanceX,
+                    'left': '-23%',
+                    'width': '16%',
+                    // 'left': '-' + panel.settings.distanceX,
+                    // 'width': panel.settings.distanceX,
                     'height': '100%',
                     'position': 'absolute',
                     'z-index': '888888',

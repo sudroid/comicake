@@ -82,13 +82,10 @@ require app_path().'/filters.php';
 
 
 //NOT FOUND? 
-
 App::missing(function($exception)
 {
     return Redirect::to('error');
 });
 
-
-//CUSTOME VALIDATION
-
+//CUSTOM VALIDATION
 require app_path().'/validators.php';

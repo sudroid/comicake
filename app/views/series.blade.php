@@ -51,7 +51,7 @@
 			@if(isset($book_issues))
 				@foreach($book_issues as $issue)
 					<div class="col-md-3 pull-left thumbnail">
-						<a href='{{ $book_title }}/{{ $issue->issue_id }}' >{{ HTML::image($issue->cover_image, $book_title . $issue->issue_id, array('width' => '100%', 'class'=>'img-rounded')); }}</a>
+						<a href='{{ $book_title }}/{{ $issue->issue_id }}' >{{ HTML::image($issue->cover_image, $book_title . $issue->issue_id, array('width' => '190px', 'height'=>'280px', 'class'=>'img-rounded')); }}</a>
 					</div>
 				@endforeach
 			@endif

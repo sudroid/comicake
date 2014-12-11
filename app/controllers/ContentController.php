@@ -1,8 +1,13 @@
 <?php
 
 class ContentController extends BaseController {
+
+	//Protected variable - master layout
 	protected $layout = "layouts.master";
 
+	/*
+	*	Constructor sets beforeFilters
+	*/
 	public function __construct() {
 
 		$this->beforeFilter('csrf', array('on'=>'post'));
@@ -12,19 +17,19 @@ class ContentController extends BaseController {
 	}
 
 	/**
-	 * Display a listing of the resource.
+	 * Show the form for adding a new comicbook series.
 	 * GET /content
 	 *
-	 * @return Response
 	 */
 	public function index()
 	{
+		$this->destorySession();
 		$data['genres'] = Genres::orderby('genre_name', 'asc')->lists('genre_name', 'id');
 		$this->layout->content = View::make('addseries', $data);
 	}
 
 	/**
-	 * Show the form for creating a new resource.
+	 * Adding a comicbook series into the database
 	 * GET /content/store
 	 *
 	 * @return Response
@@ -131,7 +136,7 @@ class ContentController extends BaseController {
 	}
 
 	/**
-	 * Show the form for editing the specified resource.
+	 * Show the form for editing a comicbook series
 	 * GET /content/{title}/edit
 	 *
 	 * @param  string  $title
@@ -158,7 +163,7 @@ class ContentController extends BaseController {
 	}
 
 	/**
-	 * Update the specified resource in storage.
+	 * Update a comicbook series
 	 * PUT /content/{title}
 	 *
 	 * @param  int  $title
@@ -166,7 +171,6 @@ class ContentController extends BaseController {
 	 */
 	public function update($title)
 	{
-		//Input::merge(array_map('trim', Input::all()));
 		$rules = array(
 		    'book_name' => 'required|min:1',
 		    'publisher_name' => 'required|min:1',
@@ -178,8 +182,6 @@ class ContentController extends BaseController {
  		$validator = Validator::make(Input::all(), $rules);
  		$comic = new Comicbooks;
  		$book_id = $comic->series($title)->select('comicdb_books.id')->first();
- 		// $data['book_id'] = $book_id->id;
- 		// $this->layout->content = View::make('test', $data);
 		if (isset($book_id->id))
 		{
 			if ($validator->passes()) {
@@ -228,7 +230,7 @@ class ContentController extends BaseController {
 	}
 
 	/**
-	 * Remove the specified resource from storage.
+	 * Remove a comicbook series from the database
 	 * DELETE /content/{title}
 	 *
 	 * @param  string $title
@@ -239,15 +241,20 @@ class ContentController extends BaseController {
 		$comic = new Comicbooks;
 		$book_id = $comic->series($title)->select('comicdb_books.id')->distinct()->get();
 		$delete_comic = $comic->findOrFail($book_id[0]->id);
-		if ($delete_comic)
-		{
-			$delete_comic->delete($book_id);
-		return Redirect::to('browse')->with('postMsg', 'The book has been deleted.');
+		if ($delete_comic){
+			Userinfo::where('book_id_FK', '=', $book_id[0]->id)->delete();
+			Comicissues::where('book_id', '=', $book_id[0]->id)->delete();
+			
+			$delete_comic->delete($book_id[0]->id);
+			return Redirect::to('browse')->with('postMsg', 'The book has been deleted.');
 		} else {
 			return Redirect::to(URL::previous())->with('postMsg', 'Whoops! Looks like you got some errors.');
 		}
 	}
 
+	/*
+	*	Create session data
+	*/
 	public function createSession() {
 		Session::put(array(
  				'book_name'	 => Input::get('book_name'),
@@ -259,6 +266,9 @@ class ContentController extends BaseController {
 		));
 	}
 
+	/*
+	*	Destroy session data
+	*/
 	public function destorySession(){
 		Session::forget('book_name');
 		Session::forget('publisher_name');

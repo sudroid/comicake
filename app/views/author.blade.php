@@ -7,7 +7,7 @@
 			<div class="col-md-2"></div>
 			<div class="col-md-10 pull-left text-uppercase text-left">
 				<div class="col-md-5 pull-left text-uppercase text-left">
-					<h4>Latest...</h4>
+					<h4>Latest Additions...</h4>
 					<a href="{{'/browse/series/'.$author_works[0]->book_name }}">
 						{{ HTML::image($author_cover[0]->cover_image, $author_works[0]->book_name, array('width' => '75%')); }}
 					</a>

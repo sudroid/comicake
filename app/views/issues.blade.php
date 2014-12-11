@@ -1,7 +1,7 @@
 <div class="row">
 	<div class="col-md-1"></div>
 	<div class="col-md-11 pull-left">
-		<h1 class="text-uppercase">{{ HTML::link('browse/series/'.$book_title, $book_title) }}</h1>
+		<h1 class="text-uppercase">{{ HTML::link('browse/series/'.$book_title, $book_title) }} # {{ $book_issue }} </h1>
 		{{Session::put('book_title', $book_title);}}
 		<br />
 		@foreach($book_info as $info)

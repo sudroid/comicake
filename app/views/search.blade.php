@@ -15,7 +15,7 @@
 		<div class="col-sm-10">
 			<ul>
 				@foreach($characters as $character)
-					<li>{{ HTML::link('browse/character/'.$character->character_name, Str::upper($character->character_name)) }}</li>
+					<li>{{ HTML::link('browse/characters/'.$character->character_name, Str::upper($character->character_name)) }}</li>
 				@endforeach
 			</ul>
 		</div>
