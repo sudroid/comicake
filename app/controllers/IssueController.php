@@ -176,7 +176,7 @@ class IssueController extends BaseController {
  		//Set variables
  		$data['issue_id'] = $id;
 		$comic_title = Comicbooks::find(Input::get('id'));
-		$comic_issues = Comicissues::issues($comic_title, $id)->select('book_id', 'issue_id')->first();
+		$comic_issues = Comicissues::issues($comic_title->book_name, $id)->select('book_id', 'issue_id')->first();
 		//If comicbook issue exists
 		if (!is_null($comic_issues))
 		{

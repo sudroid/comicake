@@ -59,7 +59,7 @@ return array(
 	*/
 
 	/* TEST EMAIL */
-	'from' => array('address' => $email, 'name' => 'TEST'),
+	'from' => array('address' => $email, 'name' => 'Password Recovery'),
 
 	/*
 	|--------------------------------------------------------------------------

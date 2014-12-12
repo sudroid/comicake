@@ -191,6 +191,7 @@ class UsersController extends BaseController {
 			$user = User::find(Auth::user()->id);
 			$user->active = 0;
 			$user->save();
+			$this->getLogout();
 		}
 		return Redirect::to('browse')->with('message', 'We\'re sorry to see you go... :(');
 	}

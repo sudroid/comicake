@@ -50,12 +50,12 @@ class ContentController extends BaseController {
 		$this->createSession();
 		//Set validation rules
 		$rules = array(
-		    'book_name' => 'required|unique:comicdb_books',
-		    'publisher_name' => 'required|min:1',
+		    'book_name' => 'required|alpha_num|unique:comicdb_books',
+		    'publisher_name' => 'required|alpha_num|min:1',
 		    'book_description' => 'max:2000',
 		    'genres' => 'min:1', 
-		    'author_name' => 'required|min:1',
-		    'artist_name' => 'required|min:1',
+		    'author_name' => 'required|alpha_num|min:1',
+		    'artist_name' => 'required|alpha_num|min:1',
 		    'published_date' => 'required|date_format:yy-m-d',
 		    'cover_image' => 'required|image',
 		    'characters' => 'min:1',
@@ -68,6 +68,7 @@ class ContentController extends BaseController {
 		
 		//Validator instance use the pass method to continue
 		if ($validator->passes()) {
+			dd($validator->passes());
 			//Instance of Comicbook model
 			$comic = new Comicbooks;
 			//Instance of Publisher model
@@ -143,7 +144,7 @@ class ContentController extends BaseController {
 						'created_at' => date('Y-m-d H:i:s', time())
 					)
 			);
-			$this->destorySession;
+			$this->destorySession();
 			return Redirect::to('browse')->with('postMsg', 'Thanks for submiting!');
 		} else {
 			return Redirect::to('content/series')->with('postMsg', 'Whoops! Looks like you got some errors.')->withErrors($validator);
