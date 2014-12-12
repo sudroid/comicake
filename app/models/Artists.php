@@ -1,5 +1,7 @@
 <?php
 
+//Artist model
+
 class Artists extends \Eloquent {
 	protected $fillable = [];
 

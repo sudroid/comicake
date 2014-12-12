@@ -11,13 +11,8 @@
 |
 */
 
+/* DATABASE VARIABLES SETUP */
 $url = parse_url(getenv("CLEARDB_DATABASE_URL"));
-
-// $host = $url["host"];
-// $username = $url["user"];
-// $password = $url["pass"];
-// $database = substr($url["path"], 1);
-
 $host = 'us-cdbr-iron-east-01.cleardb.net';
 $username = 'b4aef5d32bc848';
 $password = 'dad0bb7d';
@@ -75,6 +70,7 @@ return array(
 			'prefix'   => '',
 		),
 
+		/* DATABASE SETUP */
 		'mysql' => array(
 			'driver'    => 'mysql',
 			'host'      => $host,

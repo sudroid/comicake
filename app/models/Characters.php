@@ -1,5 +1,7 @@
 <?php
 
+//Character model
+
 class Characters extends \Eloquent {
 	protected $fillable = [];
 

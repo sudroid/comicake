@@ -33,6 +33,8 @@ App::after(function($request, $response)
 |
 */
 
+//Anon filter
+// Redirects anon user to login page, if they're not logged in
 Route::filter('auth', function()
 {
 	if (Auth::guest()) { 
@@ -40,11 +42,15 @@ Route::filter('auth', function()
 	}
 });
 
+//Basic user filter
+// Checks username against the user table, username column
 Route::filter('auth.basic', function()
 {
 	return Auth::basic('username');
 });
 
+//Admin filter
+// Redirects user back to their dashboard, if they aren't admin
 Route::filter('auth.admin', function()
 {
 	if(Auth::user()->admin == 0) {
@@ -83,7 +89,9 @@ Route::filter('csrf', function()
 {
 	if (Session::token() != Input::get('_token'))
 	{
-		return Response::error('500');
-		throw new Illuminate\Session\TokenMismatchException;
+		//Instead of bailing, just redirect user to Login page
+		return Redirect::to('login');
+		//Bail code
+		//throw new Illuminate\Session\TokenMismatchException;
 	}
 });

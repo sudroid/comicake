@@ -1,14 +1,12 @@
 <?php
 
+//Publisher model
 
 class Publishers extends Eloquent {
 
 	protected $table = 'comicdb_publishers';
 
-	public function comicbook() {
-		return $this->hasOne('Comicbooks', 'publisher_id_FK', 'id');
-	} 
-
+	//Get Publisher info
 	public function scopeFindPublisher($publisher)
 	{
 		return $query->where('publisher_name', '=', $publisher);

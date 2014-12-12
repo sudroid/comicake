@@ -1,5 +1,7 @@
 <?php
 
+//User model
+
 use Illuminate\Auth\UserTrait;
 use Illuminate\Auth\UserInterface;
 use Illuminate\Auth\Reminders\RemindableTrait;
@@ -7,9 +9,11 @@ use Illuminate\Auth\Reminders\RemindableInterface;
 
 class User extends Eloquent implements UserInterface, RemindableInterface {
 	
+	//Variables that cannot be changed 
 	protected $guarded = array('id', 'password');
+	//Variables that can be changed
 	protected $fillable = array('username', 'email', 'admin', 'active', 'created_at', 'updated_at');
-
+	//Validation rules
 	public static $rules = array(
 	    'username' => 'required|alpha_num|between:6,11|unique:comicdb_users',
 	    'email' => 'required|email|unique:comicdb_users',

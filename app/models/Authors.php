@@ -1,5 +1,7 @@
 <?php
 
+//Authors model
+
 class Authors extends \Eloquent {
 	protected $fillable = [];
 
@@ -10,8 +12,4 @@ class Authors extends \Eloquent {
 	 */
 	protected $table = 'comicdb_authors';
 
-	public function issues()
-    {
-        return $this->hasMany('Comicissues', 'author_id_FK', 'id');
-    }
 }

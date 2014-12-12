@@ -9,9 +9,15 @@ class IssueController extends BaseController {
 	*	Constructor sets beforeFilters
 	*/
 	public function __construct() {
-
+		//See filters.php
+		//Laravel contains a built in protectin for cross-site request forgery on POST. 
+		//See filters.php
 		$this->beforeFilter('csrf', array('on'=>'post'));
+		//Auth filter 
+		// Only users can accesss these methods (creating a new issue, editting it and updating it)
 		$this->beforeFilter('auth', array('only'=>array('create', 'store', 'update')));
+		//Admin filter
+		// Only admin can access destroy (deleting the issue)
 		$this->beforeFilter('auth.admin', array('only'=>array('destroy')));
 
 	}
@@ -23,15 +29,15 @@ class IssueController extends BaseController {
 	 */
 	public function create()
 	{
+		//Get book series title from session variable
 		$title = Session::get('book_title');
-		if (Comicbooks::series($title)->select('comicdb_books.id')->first())
-		{
+		//Check if book series exists, then draw data for it to add issue
+		$book_id = Comicbooks::series($title)->select('comicdb_books.id')->first();
+		if ($book_id->exists) {
 			$data['book_title'] 	= '<em>'.strtoupper($title).'</em>';
 			$data['book_id'] 		= Comicbooks::series($title)->select('comicdb_books.id')->first();
 			$this->layout->content 	= View::make('addissues', $data);
-		}
-		else 
-		{
+		} else {
 			return Redirect::to('browse')->with('postMsg', 'Looks like that book does not exist! Please check out any other titles here.');
 		}
 	}
@@ -46,6 +52,7 @@ class IssueController extends BaseController {
 	{
 		//Trim all inputs 
 		Input::merge(array_map('trim', Input::all()));
+		//Set rules
 		$rules = array(
 			'issue_number' 	 => 'required|numeric|min:2|unique:comicdb_issues,issue_id,null,book_id,book_id,'.Input::get("id"),
 		    'author_name' 	 => 'required|min:5',
@@ -54,26 +61,42 @@ class IssueController extends BaseController {
 		    'issue_summary'  => 'max:2000',
 		    'cover_image' 	 => 'required|image',
  		);
+ 		//Create session for data
  		$this->createSession();
+ 		//Set validator
 		$validator = Validator::make(Input::all(), $rules);
+		//Find comicbook series
 		$comic_title = Comicbooks::find(Input::get('id'));
+		//Check validation
 		if ($validator->passes()) {
+			//Instance of comicissues model
 			$comic_issues = new Comicissues;
+			//Set variables
 			$author = Str::lower(Input::get('author_name'));		
 			$artist = Str::lower(Input::get('artist_name'));
 			$authorExists = Authors::where('author_name', $author)->select('id')->first();
 			$artistExists = Artists::where('artist_name', $artist)->select('id')->first();
-			
-			if(isset($authorExists))
+
+			//Check if author already exist in the database
+			if(isset($authorExists)) {
+				//if they do get the id
 				$author_id = $authorExists->id;
-			else 
+			}
+			else {
+				//else create it in the Authors table using the instance of author model
 				$author_id = Authors::insertGetId(array('author_name'=>$author));
+			}
 
-			if(isset($artistExists))
+			//Check if artist already exist in the database
+			if(isset($artistExists)) {
+				//if they do get the id
 				$artist_id = $artistExists->id;
-			else 
+			} else  {
+				//else create it in the Artists table using the instance of artist model
 				$artist_id = Artists::insertGetId(array('artist_name'=>$artist));
+			}
 
+			//Add cover image to local file and set location string into database
 			if (Input::hasFile('cover_image'))
 			{
 				$fileName = $comic_title->book_name.Input::get('issue_number').'_Cov_'.Str::random(10).'.'.Input::file('cover_image')->getClientOriginalExtension();
@@ -90,6 +113,7 @@ class IssueController extends BaseController {
 			$comic_issues->cover_image = 'img/comic_covers/'.$fileName;
 			$comic_issues->save();
 
+			//Destroy session
 			$this->destorySession();
 
 			return Redirect::to('browse/series/'.$comic_title->book_name)->with('postMsg', 'Thanks for submiting!');
@@ -106,11 +130,14 @@ class IssueController extends BaseController {
 	 */
 	public function edit($id)
 	{
+		//Get book name from session 
 		$title = Session::get('book_title');
+		//Set variables
 		$data['issue_id'] = $id;
 		$book_id = Comicbooks::series($title)->select('comicdb_books.id')->first();
 		$book_issue = Comicissues::issues($title, $id)->select('book_id', 'issue_id')->first();
-		if ($book_issue)
+		//If book issue exists, then get data for it
+		if (!is_null($book_issue))
 		{
 			$data['book_title'] = '<em>'.Str::upper($title).'</em>';
 			$data['book_id'] = Comicbooks::series($title)->select('comicdb_books.id')->first();
@@ -120,7 +147,7 @@ class IssueController extends BaseController {
 		}
 		else 
 		{
-			return Redirect::to('browse')->with('postMsg', 'Looks like that book does not exist! Please check out any other titles here.');
+			return Redirect::to('browse')->with('postMsg', 'Looks like that issue does not exist! Please check out any other titles here.');
 		}
 	}
 
@@ -133,39 +160,56 @@ class IssueController extends BaseController {
 	 */
 	public function update($id)
 	{
+		//Trim inputs
 		Input::merge(array_map('trim', Input::all()));
+		//Set rules
 		$rules = array(
 		    'author_name' 	 => 'required|min:5',
 		    'artist_name' 	 => 'required|min:5',
 		    'published_date' => 'required|date_format:yy-m-d',
 		    'issue_summary'  => 'max:2000'
  		);
+ 		//Create session
  		$this->createSession();
- 		//Laravel / Eloquent doesn't support composite primary keys...
-
+ 		//Set validator
  		$validator = Validator::make(Input::all(), $rules);
+ 		//Set variables
  		$data['issue_id'] = $id;
 		$comic_title = Comicbooks::find(Input::get('id'));
 		$comic_issues = Comicissues::issues($comic_title, $id)->select('book_id', 'issue_id')->first();
-		if (!isset($comic_issues))
+		//If comicbook issue exists
+		if (!is_null($comic_issues))
 		{
+			//Validation check
 			if ($validator->passes()) {
+				//Instance of Comicissue model
 				$comic_issues = new Comicissues;
+				//Set variables
 				$author = Str::lower(Input::get('author_name'));		
 				$artist = Str::lower(Input::get('artist_name'));
 				$authorExists = Authors::where('author_name', $author)->select('id')->first();
 				$artistExists = Artists::where('artist_name', $artist)->select('id')->first();
 				
-				if(isset($authorExists))
+				//Check if author already exist in the database
+				if(isset($authorExists)) {
+					//if they do get the id
 					$author_id = $authorExists->id;
-				else 
+				}
+				else {
+					//else create it in the Authors table using the instance of author model
 					$author_id = Authors::insertGetId(array('author_name'=>$author));
+				}
 
-				if(isset($artistExists))
+				//Check if artist already exist in the database
+				if(isset($artistExists)) {
+					//if they do get the id
 					$artist_id = $artistExists->id;
-				else 
+				} else  {
+					//else create it in the Artists table using the instance of artist model
 					$artist_id = Artists::insertGetId(array('artist_name'=>$artist));
+				}
 
+				//Set an array of update variables
 				$update_array = array(	 
 						 				'author_id_FK'=> $author_id, 
 						 				'artist_id_FK' => $artist_id,
@@ -173,6 +217,7 @@ class IssueController extends BaseController {
 						 				'published_date' => Input::get('published_date'),
 						 				'updated_at' => date('Y-m-d H:i:s', time())			 				);
 
+				//Add cover image to local file and set location string into database
 				if (Input::hasFile('cover_image'))
 				{
 					$fileName =  $comic_title->book_name.$id.'_Cov_'.Str::random(10).'.'.Input::file('cover_image')->getClientOriginalExtension();
@@ -181,9 +226,9 @@ class IssueController extends BaseController {
 				}
 
 				//Add issue information to comicdb_books
-				Comicissues::where('book_id', Input::get('id'))->where('issue_id', $id)
-							 ->update($update_array);
-				
+				Comicissues::where('book_id', Input::get('id'))->where('issue_id', $id)->update($update_array);
+
+				//Destroy session data
 				$this->destorySession();
 				return Redirect::to('browse/series/'.$comic_title->book_name)->with('postMsg', 'Thanks for submiting!');
 			} else {
@@ -203,22 +248,24 @@ class IssueController extends BaseController {
 	 */
 	public function destroy($id)
 	{
+		//Set variables
 		$msg = 'The issue has been deleted.';
 		$title = Session::get('book_title');
 		$data['issue_id'] = $id;
 		$book_issue = Comicissues::issues($title, $id)->select('book_id', 'issue_id')->first();
-		if ($book_issue)
-		{
+		//Check if comicbook issue exists
+		if (!is_null($book_issue)) {
+			//Get the number of issues are in this series
 			$count = Comicissues::issuescount($title)->count();
-			if ($count<=1){
+			//If there's only one issue in the series, delete the whole series
+			if ($count<=1) {
 				$content = new ContentController();
 				$content->destroy($title);
 				$msg = 'The series and issue has been deleted.';
 			}
+			//Delete issue
 			Comicissues::where('book_id', $book_issue->book_id)->where('issue_id', $book_issue->issue_id)->delete();
-			
-			
-		return Redirect::to('browse')->with('postMsg', $msg);
+			return Redirect::to('browse')->with('postMsg', $msg);
 		} else {
 			return Redirect::to(URL::previous())->with('postMsg', 'Whoops! Looks like you got some errors.');
 		}

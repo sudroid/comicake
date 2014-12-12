@@ -11,8 +11,14 @@ class UsersController extends BaseController {
 	*	Constructor sets beforeFilters
 	*/
 	public function __construct() {
+		//See filters.php
+		//Laravel contains a built in protectin for cross-site request forgery on POST. 
 		$this->beforeFilter('csrf', array('on'=>'post'));
+		//Auth filter 
+		// Only users can accesss these methods 
 		$this->beforeFilter('auth', array('only'=>array('getDashboard', 'getAdmin', 'postDeactivate')));
+		//Admin filter
+		// Only admin can access destroy (delete an user)
 		$this->beforeFilter('auth.admin', array('only'=>array('getAdmin', 'deleteUser')));
 	}
 
@@ -24,6 +30,9 @@ class UsersController extends BaseController {
 		$this->layout->content = View::make('login');
 	}
 
+	/*
+	*	Show the registeration page
+	*/
 	public function getRegister() {
     	$this->layout->content = View::make('register');
 	}
@@ -36,11 +45,11 @@ class UsersController extends BaseController {
 	* 	See http://nl1.php.net/manual/en/function.password-hash.php 
 	* 	This is 1-way. You can never get the original string back. 
 	*
-	* 	The first part of the generated hash, exists of the used algorithm and the salt.
+	* 	The first part of the generated hash exists of the used algorithm and the salt.
 	* 	So when you pass in the original hash in Hash::check(), you can check if you get the same result. 
 	* 	See http://nl1.php.net/manual/en/function.password-verify.php 
 	*
-	* 	Laravel uses BCRYPT, so you have to see if you can use that.
+	* 	Laravel uses BCRYPT.
 	*/
 	public function postCreate() {
 		$validator = Validator::make(Input::all(), User::$rules);
@@ -69,6 +78,7 @@ class UsersController extends BaseController {
 	*	Handle the signin process
 	*/
 	public function postSignin() {
+		//Attempt to sign in using inptu data 
 		if (Auth::attempt(array('username'=>Input::get('username'), 'password'=>Input::get('password'), 'active' => 1))) {
 			return Redirect::to('dashboard')->with('message', 'You are now logged in!');
 		} else {
@@ -82,6 +92,7 @@ class UsersController extends BaseController {
 	*	Show the user dashboard
 	*/
 	public function getDashboard() {
+		//Get info
 		$user 					= Auth::user()->id;
 		$admin 					= Auth::user()->admin;
 		$active 				= Auth::user()->active;
@@ -95,7 +106,9 @@ class UsersController extends BaseController {
 		$data['read_publisher_count'] 	= "";
 		$data['read_genre_name'] 		= "";
 		$data['read_genre_count']		= "";
+		//Check if the user has anything in the userinfo table for read comicbook series and publisher
 		if (count($data['read_publisher']) != 0) {
+			//Set data into an array to then returns a json encoded string
 			foreach ($data['read_publisher'] as $count) {
 				$publisher_name[] = $count->publisher_name;
 				$publisher_count[]= $count->count;
@@ -104,7 +117,9 @@ class UsersController extends BaseController {
 			$data['read_publisher_count'] = json_encode($publisher_count);
 		}
 
+		//Check if the user has anything in the userinfo table for read comicbook series and genre
 		if(count($data['read_genre']) != 0) {
+			//Set data into an array to then returns a json encoded string
 			foreach ($data['read_genre'] as $count) {
 				$genre_name[] = $count->genre_name;
 				$genre_count[]  = $count->count;
@@ -112,7 +127,6 @@ class UsersController extends BaseController {
 			$data['read_genre_name'] = json_encode($genre_name);
 			$data['read_genre_count']= json_encode($genre_count);
 		}
-
 		$this->layout->content 	= View::make('users.dashboard', $data);
 	}
 
@@ -120,6 +134,7 @@ class UsersController extends BaseController {
 	*	Show the admin page
 	*/
 	public function getAdmin(){
+		//Get info
 		$data['users'] = User::paginate(5);
 		$data['recent_books'] 	= Comicbooks::select('book_name','updated_at')->orderBy('updated_at', 'desc')->paginate(3);
 		$data['user_count']		= User::where('id', '>', 0)->count();
@@ -131,20 +146,27 @@ class UsersController extends BaseController {
 		$data['books_created']	= Comicbooks::select(DB::raw('count(*) as count'), 'created_at')->groupby(DB::raw('date_format(created_at, "%b %Y")'))->orderby('created_at', 'asc')->get();
 		$data['issues_created']	= Comicissues::select(DB::raw('count(*) as count'), 'created_at')->groupby(DB::raw('date_format(created_at, "%b %Y")'))->orderby('created_at', 'asc')->get();
 
+		//Check if there are any comicbook series
 		if(count($data['books_created']) > 0) {
+			//Get the count of books per the month/year then return the json encoded string
 			foreach($data['books_created'] as $created) {
 				$created_books[] = $created->count;
 				$created_books_date[] = date_format($created->created_at, "M Y");
 			}
 			$data['created_books'] = json_encode($created_books);
 		}
+
+		//Check if there are any comicbook issue
 		if(count($data['issues_created']) > 0) {
+			//Get the count of issues per the month/year then return the json encoded string
 			foreach($data['issues_created'] as $created) {
 				$created_issues[] = $created->count;
 				$created_issues_date[] = date_format($created->created_at, "M Y");
 			}
 			$data['created_issues'] = json_encode($created_issues);
 		}
+
+		//Merge dates from comicbook series and issues created then return the json encoded string
 		$data['created_dates'] = json_encode(array_unique(array_merge($created_issues_date, $created_books_date)));
  		$this->layout->content 	= View::make('admin.index', $data);
 	}
@@ -153,7 +175,9 @@ class UsersController extends BaseController {
 	*	Handle the logout process
 	*/
 	public function getLogout() {
+		//Logout
 		Auth::logout();
+		//Destroy session
 		Session::flush();
 		return Redirect::to('login')->with('message', 'Your are now logged out!');
 	}
@@ -162,6 +186,7 @@ class UsersController extends BaseController {
 	*	Handle user deactivation by updating the status to inactive (bool - 0)
 	*/
 	public function postDeactivate(){
+		//Check if user is active, if not then find the user and set their active status to deactivated
 		if (Auth::user()->active) {
 			$user = User::find(Auth::user()->id);
 			$user->active = 0;
@@ -175,11 +200,14 @@ class UsersController extends BaseController {
 	*/
 	public function destroy($id)
 	{
+		//Message that's returned
 		$msg = '<div class="alert alert-warning alert-dismissible col-md-12" role="alert">
 					  <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 					 	User Deleted!
 				</div>';
+		//Delete userinfo with that user's data
 		Userinfo::deleteUser($id);
+		//Delete user
 		User::findOrFail($id);	
 		User::destroy($id);
 		return Redirect::to('admin')->with('message', $msg);

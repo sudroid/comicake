@@ -3,15 +3,24 @@
 class BrowseController extends BaseController {
 
 	//Protected variables
+
+	//Layout 
 	protected $layout = "layouts.master";
 
+	//Default error message
 	protected $msg = '<div class="alert alert-warning alert-dismissible fade in" role="alert">
 			      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
 			      <strong>Oops!</strong> There\'s nothing here.
 			    </div>';
+
+    //Comic Vine API url
     protected $comicvine_url = "http://www.comicvine.com/api";
-    protected $cbr_url = "http://www.comicbookresources.com/feed.php?feed=news";
+
+    //Comic Vine API Key 
     protected $api_key = "f195f882d737aee5bca1c43ac44a224b15307a1c";
+
+    //Comicbookresources API url
+    protected $cbr_url = "http://www.comicbookresources.com/feed.php?feed=news";
 
     /*
     * 	Get browse latest view
@@ -21,11 +30,16 @@ class BrowseController extends BaseController {
     */
 	public function getIndex()
 	{
+		//Page Title 
 		$data['title'] 	= "The latest...";
+
+		//Get latest comicbooks' book id, issue id, summary, book name and cover image
 		$data['comics'] = Comicbooks::latest()
 							->select('book_id', 'issue_id', 'summary', 'book_name', 'cover_image')
 							->distinct()->get();
 		$latest_number 	= count($data['comics']);
+
+		//Cut off Summary in the latest page to 200 characters
 		for ($count=0; $count<$latest_number; $count++) {
 			$summary = $data['comics'][$count]->summary;
 			if(strlen($summary) > 200 ) { 
@@ -33,6 +47,7 @@ class BrowseController extends BaseController {
 			} 
 		}
 
+		//Get Comicbookresources xml 
 		if ($response_xml_data = file_get_contents($this->cbr_url))
 		{
 			$xml_data = simplexml_load_string($response_xml_data);
@@ -49,8 +64,14 @@ class BrowseController extends BaseController {
 	* 	If it doesn't match any of the side panel options, then redirect to the Error page
 	*/
 	public function getBrowse($category){
-		$category_filtered = strtoupper(trim($category));
-		$data['title'] = $category_filtered;
+
+		//Get browse category
+		$category_filtered 	= strtoupper(trim($category));
+
+		//Page Title 
+		$data['title'] 		= $category_filtered;
+
+		//Switch to get appropriate data, redirect to error if options aren't listed
 		switch($category_filtered):
 			case 'SERIES':
 				$data['comics'] = Comicbooks::orderBy('book_name', 'asc')->get();
@@ -71,6 +92,7 @@ class BrowseController extends BaseController {
 				$data['comics'] = Genres::orderBy('genre_name', 'asc')->get();
 				break;
 			case 'YEARS':
+			//This needed to be a raw query because of the date 
 				$data['comics'] = Comicissues::select(DB::raw('year(published_date) as year'))->orderBy('published_date', 'asc')->distinct()->get();
 				break;
 			default: 
@@ -86,17 +108,23 @@ class BrowseController extends BaseController {
 	*/
 	public function getSeries($book)
 	{
-		// THIS INVOKES A STATIC METHOD SERIES
+		//Page Title 
 		$data['book_title'] = $book;
+
+		//Get the first result of book series query 
 		$data['book'] 		= Comicbooks::series($book)->select('comicdb_books.id')->distinct()->first();
+		
+		//If it's not null...
 		if ($data['book'])
 	    {
+	    	//Get book information
 	    	$data['book_info'] 		 = Comicbooks::series($book)->select('publisher_name','book_description')->distinct()->get();
 		    $data['book_genre'] 	 = Comicbooks::series($book)->select('genre_name')->distinct()->get();
 		    $data['book_issues']	 = Comicbooks::series($book)->select('issue_id', 'cover_image', 'book_id')->distinct()->get();
 			$data['book_characters'] = Comicbooks::bookcharacters($book)->select('character_name')->distinct()->get();
 			$comic 					 = Comicbooks::series($book)->select('comicdb_books.id')->first();
 			$read 					 = Userinfo::where('book_id_FK', $comic->id)->where('user_id_FK', Auth::id())->select('read_status', 'reading_status')->first();
+			//If read variable isn't empty
 			if ($read != '') {
 				switch($read->read_status){
 					case 0:
@@ -120,18 +148,18 @@ class BrowseController extends BaseController {
 						break;
 				}
 			}
-			else 
+			else //else set to default values
 			{
 				$data['read_msg'] = 'MARK AS READ';
 				$data['read_status'] = 1;
 				$data['reading_msg'] = 'ADD TO READLIST';
 				$data['reading_status'] = 1;
 			}
-			
 			$this->layout->content = View::make('series', $data);
 		}
 		else 
 		{
+			//Redirect to the error page if the book series it doesn't exist
 			return Redirect::to('error');
 		}
 	}
@@ -142,8 +170,12 @@ class BrowseController extends BaseController {
 	public function getIssues($book, $issue_no){
 		$data['book_title'] = $book;
 		$data['book_issue'] = $issue_no;
+
+		//Get issue information
 		$data['book_info'] 	= Comicbooks::issues($book, $issue_no)->distinct()->get();
 		$data['book_genre'] = Comicbooks::issuegenre($book, $issue_no)->distinct()->get();
+
+		//Check to see if issue exist. If it doesn't Redirect to error page
 		$data['has_issue'] 	= (count($data['book_info'])) ? true : false;
 		if (!$data['has_issue']) {
 			return Redirect::to('error');
@@ -158,6 +190,7 @@ class BrowseController extends BaseController {
 	*/
 	public function getAuthors($author)
 	{
+		//Get Author information
 		$data['author_name']  = $author;
 		$data['author_cover'] = Comicbooks::authors($author)
 	    										->select('cover_image')
@@ -167,6 +200,8 @@ class BrowseController extends BaseController {
 									   ->select('book_name')
 									   ->orderBy('published_date', 'asc')
 									   ->distinct()->get();
+
+	   //Check to see if author exist in database. If it doesn't Redirect to a wiki page
 		$data['has_author']   = (count($data['author_works'])) ? true : false;
 		if (!$data['has_author']) {
 			return Redirect::away("http://en.wikipedia.org/wiki/".ucwords($author));
@@ -181,6 +216,7 @@ class BrowseController extends BaseController {
 	*/
 	public function getArtists($artist){
 		$data['artist_name']  = $artist;
+		//Get Artist information
 		$data['artist_cover'] = Comicbooks::artists($artist)
 	    										->select('cover_image')
 												->orderBy('published_date', 'asc')
@@ -189,6 +225,8 @@ class BrowseController extends BaseController {
 									   ->select('book_name')
 									   ->orderBy('published_date', 'asc')
 									   ->distinct()->get();
+
+	   	//Check to see if artist exist in database. If it doesn't Redirect to a wiki page
 	    $data['has_artist']   = (count($data['artist_works'])) ? true : false;
 		if (!$data['has_artist']) {
 			return Redirect::away("http://en.wikipedia.org/wiki/".ucwords($artist));
@@ -203,6 +241,7 @@ class BrowseController extends BaseController {
 	*/
 	public function getPublishers($publisher){
 		$data['publisher_name']  = $publisher;
+		//Get Publisher information
 		$data['publisher_cover'] = Comicbooks::publishers($publisher)
 	    										->select('cover_image')
 												->orderBy('published_date', 'asc')
@@ -213,6 +252,8 @@ class BrowseController extends BaseController {
 										  ->orderBy('published_date', 'asc')
 										  ->distinct()
 										  ->get();
+
+	    //Check to see if publisher exist in database. If it doesn't Redirect to a wiki page
 		$data['has_publisher'] 	 = (count($data['publisher_works'])) ? true : false;
 		if (!$data['has_publisher']) {
 			return Redirect::away("http://en.wikipedia.org/wiki/".ucwords($publisher));
@@ -227,11 +268,14 @@ class BrowseController extends BaseController {
 	*/
 	public function getGenres($genre){
 		$data['genre_name'] = $genre;
+		//Get Genre list from database
 		$genre_list 		= Genres::lists('genre_name');
+		//Check and see if Genre is in Genre list. If it doesn't, redirect to error page
 		if (!in_array($genre, $genre_list)) {
 			return Redirect::to('error');
 		}
 		else {		
+			//Get Genre information
 			$data['genre_cover'] = Comicbooks::genres($genre)
 									  ->select('cover_image')
 									  ->orderBy('comicdb_books.created_at', 'desc')
@@ -240,11 +284,6 @@ class BrowseController extends BaseController {
 									 		  ->select('book_name')
 											  ->orderBy('comicdb_books.created_at', 'desc')
 											  ->distinct()->get();
-		    $data['has_genre'] 	 = (count($data['genre_works'])) ? true : false;
-
-		    if (!$data['has_genre']) {
-				return Redirect::to('browse/genres')->with('postMsg', $this->msg);
-			}
 		}
 		$this->layout->content = View::make('genre', $data);
 	}
@@ -258,10 +297,12 @@ class BrowseController extends BaseController {
 	*/
 	public function getCharacters($character){
 		$data['character_name']  = $character;
+		//Get character information from Comic Vine API
 		$xml_url = $this->comicvine_url."/characters/?api_key=".$this->api_key."&filter=name:".strtolower($character);
 		if ($response_xml_data = file_get_contents($xml_url)) {
 			$xml_data = simplexml_load_string($response_xml_data);
 			$character_data = $xml_data->results->character; 
+			//Check if character has data in Comic Vine, else put in empty values
 			if ( count($character_data) > 0 ) {
 				$data['detail_url'] = (string)$character_data->site_detail_url;
 				$aliases = $character_data->aliases;
@@ -272,6 +313,7 @@ class BrowseController extends BaseController {
 				$data['publisher'] = strtolower((string)$character_data->publisher->name);
 			}
 			else {
+				//
 				$data['detail_url'] = "";
 				$data['aliases'] = "";
 				$data['appearances_count'] =  "";
@@ -280,6 +322,8 @@ class BrowseController extends BaseController {
 				$data['publisher'] = "";
 			}
 		}
+
+		//Get character's comicbook info
 		$data['character_cover'] = Comicbooks::characters($character)
 									->select('cover_image')
 									->orderBy('published_date', 'asc')
@@ -290,6 +334,9 @@ class BrowseController extends BaseController {
 										  ->orderBy('published_date', 'asc')
 										  ->distinct()
 										  ->get();
+
+		//Check if character has appearances in the comics that are in the database. 
+	    //If not redirect character wiki page
 		$data['has_character'] 	 = (count($data['character_works'])) ? true : false;
 		if (!$data['has_character']) {
 			return Redirect::away("http://en.wikipedia.org/wiki/".ucwords($character));
@@ -304,6 +351,8 @@ class BrowseController extends BaseController {
 	*/
 	public function getYears($year){
 		$data['year_name'] 	= $year;
+
+		//Get comics published in a specific year
 		$data['year_cover'] = Comicbooks::years($year)
 									->select('cover_image')
 									->orderBy('published_date', 'asc')
@@ -315,6 +364,7 @@ class BrowseController extends BaseController {
 										  ->distinct()
 										  ->get();
 		$data['has_year'] 	= (count($data['year_works'])) ? true : false;
+		//If there are no series published in the year (because of URL tempering), return with error message
 		if (!$data['has_year']) {
 			return Redirect::to('browse/year')->with('postMsg', $this->msg);
 		}

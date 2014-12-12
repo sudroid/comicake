@@ -6,8 +6,13 @@
  *	route "/" should be placed as last one, as this says there is nothing 
  *	more to lookup
  *
+ * 	 NOTE: Order of the routes matters
  */
 
+
+/*
+*	Manually set error page with the default layout
+*/
 View::name('layouts.master', 'layout');
 $layout = View::of('layout');
 
@@ -16,6 +21,7 @@ Route::get('error', function() use ($layout) {
 	return $layout->nest('content', 'error', $data);
 });
 
+//Basic POST routes
 //Mark to read or not to read status
 Route::post('reading/{title}', 'ReadstatusController@postReading');
 //Mark as Read or Unread status
@@ -23,12 +29,14 @@ Route::post('read/{title}', 'ReadstatusController@postRead');
 //Search
 Route::post('search', 'SearchController@index');
 
-//Resource route for Issue
+//Resource route for Issue and Series, respectfully
+//These are RESTful controllers built around resources
 Route::resource('content/issue', 'IssueController');
-//Resource route for Series
 Route::resource('content/series', 'ContentController');
 
 //Browse options 
+//Basic GET routes
+//All but the last route line has route paramaters which is passed to the Controller method
 Route::get('browse/series/{title}/{issue}', 'BrowseController@getIssues');
 Route::get('browse/characters/{name}', 'BrowseController@getCharacters');
 Route::get('browse/years/{year}', 'BrowseController@getYears');
@@ -40,12 +48,14 @@ Route::get('browse/series/{title}', 'BrowseController@getSeries');
 Route::get('browse/{category}', 'BrowseController@getBrowse');
 Route::get('browse', 'BrowseController@getIndex');
 
-
-//Password Controller
+//Implicit Controller for password reminder which then fires all the methods within the Reminders controller
 Route::controller('password', 'RemindersController');
 
+//Basic GET route
 Route::get('/', 'HomeController@showWelcome');
 
-//User Controller
+//DELETE route
 Route::delete('users/{id}', ['uses' => 'UsersController@destroy', 'as'=>'users.destroy']);
+
+//Implicit Controller for User which then fires all the methods within the Users controller
 Route::controller('/', 'UsersController');

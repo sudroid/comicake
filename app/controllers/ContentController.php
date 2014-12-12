@@ -9,10 +9,14 @@ class ContentController extends BaseController {
 	*	Constructor sets beforeFilters
 	*/
 	public function __construct() {
-
+		//See filters.php
+		//Laravel contains a built in protectin for cross-site request forgery on POST. 
 		$this->beforeFilter('csrf', array('on'=>'post'));
-		$this->beforeFilter('auth');
+		//Auth filter 
+		// Only users can accesss these methods (creating a new series, editting it and updating it)
 		$this->beforeFilter('auth', array('only'=>array('store', 'edit', 'update')));
+		//Admin filter
+		// Only admin can access destroy (deleting the series)
 		$this->beforeFilter('auth.admin', array('only'=>array('destroy')));
 	}
 
@@ -23,7 +27,9 @@ class ContentController extends BaseController {
 	 */
 	public function index()
 	{
+		//Destroy session data
 		$this->destorySession();
+		//Get genre list
 		$data['genres'] = Genres::orderby('genre_name', 'asc')->lists('genre_name', 'id');
 		$this->layout->content = View::make('addseries', $data);
 	}
@@ -36,9 +42,13 @@ class ContentController extends BaseController {
 	 */
 	public function store()
 	{
+		//Get string inputs
 		$inputs = Input::only('book_name', 'publisher_name', 'author_name', 'artist_name');
+		//Trim string inputs
 		Input::merge(array_map('trim', $inputs));
+		//Create session 
 		$this->createSession();
+		//Set validation rules
 		$rules = array(
 		    'book_name' => 'required|unique:comicdb_books',
 		    'publisher_name' => 'required|min:1',
@@ -48,14 +58,21 @@ class ContentController extends BaseController {
 		    'artist_name' => 'required|min:1',
 		    'published_date' => 'required|date_format:yy-m-d',
 		    'cover_image' => 'required|image',
-		    'characters' => 'min:1'
+		    'characters' => 'min:1',
+		    'issue_summary' => 'max:2000'
  		);
 
+		//Laravel Validation class and make method takes the inputs in the first argument 
+		//then the rules on the data in the second
 		$validator = Validator::make(Input::all(), $rules);
-
+		
+		//Validator instance use the pass method to continue
 		if ($validator->passes()) {
+			//Instance of Comicbook model
 			$comic = new Comicbooks;
+			//Instance of Publisher model
 			$publishers = new Publishers;
+			//Setting variables
 			$publisher = strtolower(Input::get('publisher_name'));
 			$author = strtolower(Input::get('author_name'));		
 			$artist = strtolower(Input::get('artist_name'));
@@ -63,34 +80,31 @@ class ContentController extends BaseController {
 			$authorExists = Authors::where('author_name', $author)->select('id')->first();
 			$artistExists = Artists::where('artist_name', $artist)->select('id')->first();
 			
-			if (isset($publisherExists->id))
-			{
+			//Check if publisher already exist in the database
+			if (isset($publisherExists->id)){
+				//if it does get the id
 				$publisher_id = $publisherExists->id;
-			}	
-			else {
+			} else {
+				//else create it in the Publisher table using the instance of publisher model
 				$publisher_id = $publishers->insertGetId(array('publisher_name'=> $publisher));
 			}
 
-			if(isset($authorExists))
-			{
+			//Check if author already exist in the database
+			if(isset($authorExists)){
+				//if they do get the id
 				$author_id = $authorExists->id;
-				
-			}
-			else 
-			{
+			} else {
+				//else create it in the Authors table using the instance of author model
 				$author_id = Authors::insertGetId(array('author_name'=>$author));
-				
 			}
 
-			if(isset($artistExists))
-			{
+			//Check if artist already exist in the database
+			if(isset($artistExists)){
+				//if they do get the id
 				$artist_id = $artistExists->id;
-				
-			}
-			else 
-			{
+			} else {
+				//else create it in the Artists table using the instance of artist model
 				$artist_id = Artists::insertGetId(array('artist_name'=>$artist));
-				
 			}
 
 			//Add book series information to comicdb_books
@@ -99,17 +113,18 @@ class ContentController extends BaseController {
 			$comic->publisher_id_FK = $publisher_id;
 			$comic->save();
 
-			//Add genre and book ids in the comicdb_genrebook
+			//Add genre and book ids in the comicdb_genrebook using Query Builder
 			foreach (Input::get('genres') as $key => $genre){
 				DB::table('comicdb_genrebook')->insert(array('book_id_FK'=>$comic->id, 'genre_id_FK'=>$genre));
 			}	
+			//Add cover image to local file and set location string into database
 			if (Input::hasFile('cover_image'))
 			{
 				$fileName = strtolower(Input::get('book_name')).'01_Cov_'.Str::random(10).'.'.Input::file('cover_image')->getClientOriginalExtension();
 				$cover_image = Input::file('cover_image')->move('public/img/comic_covers/', $fileName);
 			}
 
-			//Add issue character information into the comicdb_character table and keys into the comicdb_characterbook table
+			//Add issue character information into the comicdb_character table and keys into the comicdb_characterbook table using Query Builder
 			foreach (Input::get('characters') as $key => $character){
 				$character_id = Characters::insertGetId(array('character_name'=>$character));
 				DB::table('comicdb_characterbook')->insert(array('book_id_FK'=>$comic->id, 'character_id_FK'=>$character_id));
@@ -128,7 +143,7 @@ class ContentController extends BaseController {
 						'created_at' => date('Y-m-d H:i:s', time())
 					)
 			);
-			
+			$this->destorySession;
 			return Redirect::to('browse')->with('postMsg', 'Thanks for submiting!');
 		} else {
 			return Redirect::to('content/series')->with('postMsg', 'Whoops! Looks like you got some errors.')->withErrors($validator);
@@ -144,12 +159,14 @@ class ContentController extends BaseController {
 	 */
 	public function edit($title)
 	{
+		//Instance of Comicbook model
 		$comic = new Comicbooks();
+		//Set variables
 		$data['book_title'] = $title;
-		$book_id = $comic->series($title)->select('comicdb_books.id as id')->first();
-		$data['id'] =$book_id ;
-		if ($book_id)
-		{
+		$book_id 			= $comic->series($title)->select('comicdb_books.id as id')->first();
+		$data['id'] 		= $book_id;
+		//If book exists, get the issue information and fill the form with it
+		if (!is_null($book_id)) {
 			$data['book_info'] = $comic->series($title)->select('comicdb_books.id as id', 'book_name', 'publisher_name', 'book_description')->distinct()->get();
 			$data['selected_genres'] = $comic->series($title)->select('comicdb_genre.id', 'genre_name')->distinct()->get();
 			$data['book_characters'] = $comic->bookcharacters($title)->select('character_name')->distinct()->get();
@@ -171,6 +188,7 @@ class ContentController extends BaseController {
 	 */
 	public function update($title)
 	{
+		//Set rules
 		$rules = array(
 		    'book_name' => 'required|min:1',
 		    'publisher_name' => 'required|min:1',
@@ -178,27 +196,30 @@ class ContentController extends BaseController {
 		    'genres' => 'min:1',
 		    'characters' => 'min:1' 
  		);
-
+		//Validate
  		$validator = Validator::make(Input::all(), $rules);
+ 		//Instance of Comicbook model
  		$comic = new Comicbooks;
  		$book_id = $comic->series($title)->select('comicdb_books.id')->first();
-		if (isset($book_id->id))
-		{
+ 		//If the comicbook series exists
+		if (!is_null($book_id)) {
+			//If validation passes
 			if ($validator->passes()) {
+				//Instance of Publisher model
 				$publishers = new Publishers;
+				//Set variables
 				$book_name = strtolower(Input::get('book_name'));
 				$publisher = strtolower(Input::get('publisher_name'));
 
 				//If publisher already exists, get the id of that publisher from the comicdb_publishers table
 				$publisherExists = $publishers->where('publisher_name', $publisher)->select('id')->first();
-				if (isset($publisherExists->id))
-				{
+				if (isset($publisherExists->id)){
 					$publisher_id = $publisherExists->id;
-
-				}	
-				else {
+				} else {
 					$publisher_id = $publishers->insertGetId(array('publisher_name'=> $publisher));
 				}
+
+				//Update comic series
 				$update_comic = $comic->findOrFail($book_id->id);
 				$update_comic->book_name = $book_name;
 				$update_comic->book_description = Input::get('book_description');
@@ -207,7 +228,7 @@ class ContentController extends BaseController {
 
 				//Delete then reinsert all the values because that way is easier.
 				DB::table('comicdb_genrebook')->where('book_id_FK', $update_comic->id)->delete();
-				foreach (Input::get('genres') as $key => $genre){
+				foreach (Input::get('genres') as $key => $genre) {
 					DB::table('comicdb_genrebook')->insert(array('book_id_FK'=>$update_comic->id, 'genre_id_FK'=>$genre));
 				}
 
@@ -222,9 +243,7 @@ class ContentController extends BaseController {
 			} else {
 				return Redirect::to('content.series.edit')->with('postMsg', 'Whoops! Looks like you got some errors.')->withErrors($validator)->withInput();
 			}
-		}
-		else 
-		{
+		} else  {
 			return Redirect::to('content.series.edit')->with('postMsg', 'That book does not exist!');
 		}
 	}
@@ -238,13 +257,17 @@ class ContentController extends BaseController {
 	 */
 	public function destroy($title)
 	{
+		//Instance of Comicbooks model
 		$comic = new Comicbooks;
 		$book_id = $comic->series($title)->select('comicdb_books.id')->distinct()->get();
 		$delete_comic = $comic->findOrFail($book_id[0]->id);
+		//If the comicbook series exists
 		if ($delete_comic){
+			//Delete any instance of it in the Userinfo table (tracks unread/to read list)
 			Userinfo::where('book_id_FK', '=', $book_id[0]->id)->delete();
+			//Delete any instance of it in the comicbook issues table
 			Comicissues::where('book_id', '=', $book_id[0]->id)->delete();
-			
+			//Delete the comicbook series in the comicbook books table
 			$delete_comic->delete($book_id[0]->id);
 			return Redirect::to('browse')->with('postMsg', 'The book has been deleted.');
 		} else {

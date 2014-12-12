@@ -1,7 +1,8 @@
 <?php
 
+//Genre model
+
 class Genres extends \Eloquent {
-	protected $fillable = [];
 
 	/**
 	 * The database table used by the model.

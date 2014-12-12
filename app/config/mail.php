@@ -1,5 +1,9 @@
 <?php
 
+/* TEST EMAIL */
+$email = 'sammy32@gmail.com';
+$password = '';
+	
 return array(
 
 	/*
@@ -54,7 +58,8 @@ return array(
 	|
 	*/
 
-	'from' => array('address' => 'sammy32@gmail.com', 'name' => 'Sam'),
+	/* TEST EMAIL */
+	'from' => array('address' => $email, 'name' => 'TEST'),
 
 	/*
 	|--------------------------------------------------------------------------
@@ -80,7 +85,7 @@ return array(
 	|
 	*/
 
-	'username' => 'sammy32@gmail.com',
+	'username' => $email,
 
 	/*
 	|--------------------------------------------------------------------------
@@ -93,7 +98,7 @@ return array(
 	|
 	*/
 
-	'password' => 'pooklet513',
+	'password' => $password,
 
 	/*
 	|--------------------------------------------------------------------------

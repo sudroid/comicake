@@ -81,7 +81,7 @@ App::down(function()
 require app_path().'/filters.php';
 
 
-//NOT FOUND? 
+//NOT FOUND? Redirect to error page
 App::missing(function($exception)
 {
     return Redirect::to('error');
